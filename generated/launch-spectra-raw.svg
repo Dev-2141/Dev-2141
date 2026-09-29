@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250" width="900" height="250" role="img" aria-label="spectra-raw launch card">
+<defs>
+<linearGradient id="logo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#39d353"/><stop offset="1" stop-color="#56d4dd"/></linearGradient>
+<linearGradient id="edge" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#39d353"/><stop offset=".35" stop-color="#30363d"/><stop offset=".65" stop-color="#30363d"/><stop offset="1" stop-color="#56d4dd"/>
+<animateTransform attributeName="gradientTransform" type="rotate" values="0 .5 .5;360 .5 .5" dur="8s" repeatCount="indefinite"/>
+</linearGradient>
+<radialGradient id="glow" cx="0.12" cy="0.3" r="0.6"><stop offset="0" stop-color="#39d353" stop-opacity=".18"/><stop offset="1" stop-color="#39d353" stop-opacity="0"/></radialGradient>
+<clipPath id="card"><rect width="900" height="250" rx="18"/></clipPath>
+<clipPath id="logoClip"><rect width="104" height="104" rx="24"/></clipPath>
+</defs>
+<style>
+text { font-family: 'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif; fill: #e6edf3; }
+.eyebrow { font: 700 12px ConsolasFallback, Consolas, 'SFMono-Regular', Menlo, 'Liberation Mono', monospace; letter-spacing: 2.5px; fill: #39d353; }
+.name { font-size: 34px; font-weight: 800; }
+.tl { font-size: 16.5px; fill: #adbac7; }
+.tag { font-size: 12px; font-weight: 600; fill: #39d353; }
+.s { font-size: 12px; fill: #768390; }
+.sv { font-size: 17px; font-weight: 700; }
+.si { fill: #39d353; }
+.mono { font-size: 42px; font-weight: 900; fill: #0d1117; }
+.up { font-size: 26px; font-weight: 800; }
+.upl { font: 700 10px ConsolasFallback, Consolas, 'SFMono-Regular', Menlo, 'Liberation Mono', monospace; letter-spacing: 2px; fill: #768390; }
+.live { animation: pulse 1.6s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes pulse { from { transform: scale(1); opacity: .7; } to { transform: scale(3.2); opacity: 0; } }
+.float { animation: float 5s ease-in-out infinite; }
+@keyframes float { 50% { transform: translateY(-6px); } }
+.shine { animation: shine 3.5s ease-in-out infinite; }
+@keyframes shine { 0%, 55% { transform: translateX(-140px) skewX(-20deg); } 100% { transform: translateX(160px) skewX(-20deg); } }
+.arrow { animation: bob 1.8s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-5px); } }
+.grow { transform-box: fill-box; transform-origin: left; animation: grow 1.4s cubic-bezier(.2,.8,.2,1) both .4s; }
+@keyframes grow { from { transform: scaleX(0); } }
+.cf { opacity: .55; animation: rise linear infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes rise { from { transform: translateY(0) rotate(0); } to { transform: translateY(-290px) rotate(540deg); } }
+.in { opacity: 0; animation: in .6s ease-out forwards; }
+@keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+</style>
+<g clip-path="url(#card)">
+<rect width="900" height="250" fill="#0d1117"/>
+<rect width="900" height="250" fill="url(#glow)"/>
+<rect x="47" y="260" width="5.1" height="8.2" rx="1" fill="#39d353" class="cf" style="animation-delay:-3.31s;animation-duration:7.1s"/><rect x="223" y="260" width="6.7" height="10.7" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-3.98s;animation-duration:8.0s"/><rect x="598" y="260" width="7.1" height="11.3" rx="1" fill="#e3b341" class="cf" style="animation-delay:-5.93s;animation-duration:7.3s"/><rect x="841" y="260" width="4.4" height="7.0" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-6.59s;animation-duration:10.7s"/><rect x="389" y="260" width="6.7" height="10.8" rx="1" fill="#39d353" class="cf" style="animation-delay:-5.04s;animation-duration:11.7s"/><rect x="257" y="260" width="3.9" height="6.2" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-0.70s;animation-duration:11.9s"/><rect x="241" y="260" width="6.0" height="9.5" rx="1" fill="#e3b341" class="cf" style="animation-delay:-4.25s;animation-duration:11.3s"/><rect x="512" y="260" width="5.8" height="9.2" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-1.12s;animation-duration:11.3s"/><rect x="160" y="260" width="7.6" height="12.2" rx="1" fill="#39d353" class="cf" style="animation-delay:-1.70s;animation-duration:11.4s"/><rect x="595" y="260" width="4.4" height="7.1" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-7.37s;animation-duration:7.1s"/><rect x="562" y="260" width="3.9" height="6.2" rx="1" fill="#e3b341" class="cf" style="animation-delay:-8.48s;animation-duration:11.1s"/><rect x="143" y="260" width="5.9" height="9.4" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-4.83s;animation-duration:7.1s"/><rect x="695" y="260" width="6.8" height="10.9" rx="1" fill="#39d353" class="cf" style="animation-delay:-6.64s;animation-duration:10.5s"/><rect x="132" y="260" width="4.5" height="7.2" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-1.13s;animation-duration:7.8s"/><rect x="601" y="260" width="6.7" height="10.7" rx="1" fill="#e3b341" class="cf" style="animation-delay:-7.74s;animation-duration:11.0s"/><rect x="602" y="260" width="3.7" height="5.9" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-4.57s;animation-duration:9.1s"/><rect x="717" y="260" width="3.8" height="6.1" rx="1" fill="#39d353" class="cf" style="animation-delay:-3.06s;animation-duration:7.4s"/><rect x="581" y="260" width="6.9" height="11.0" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-7.23s;animation-duration:8.9s"/><rect x="667" y="260" width="3.5" height="5.6" rx="1" fill="#e3b341" class="cf" style="animation-delay:-7.14s;animation-duration:10.1s"/><rect x="822" y="260" width="7.5" height="12.0" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-0.72s;animation-duration:11.8s"/><rect x="368" y="260" width="5.1" height="8.1" rx="1" fill="#39d353" class="cf" style="animation-delay:-0.23s;animation-duration:7.4s"/><rect x="310" y="260" width="3.8" height="6.1" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-3.16s;animation-duration:7.3s"/>
+</g>
+<rect x="1" y="1" width="898" height="248" rx="17" fill="none" stroke="url(#edge)" stroke-width="2"/>
+<g transform="translate(36,36)"><g class="float">
+<g clip-path="url(#logoClip)">
+<rect width="104" height="104" fill="url(#logo)"/>
+<rect x="20" y="-20" width="40" height="150" fill="#fff" opacity=".25" class="shine"/>
+</g>
+<text x="52" y="67" class="mono" text-anchor="middle">SR</text>
+</g></g>
+<g transform="translate(168,44)">
+<g class="in" style="animation-delay:.05s">
+<circle cx="5" cy="-4" r="5" fill="#39d353" class="live"/><circle cx="5" cy="-4" r="5" fill="#39d353"/>
+<text x="18" y="0" class="eyebrow">NOW LIVE · LAUNCHED AUG 2026</text>
+</g>
+<text y="40" class="name in" style="animation-delay:.15s">spectra-raw</text>
+<text y="70" class="tl in" style="animation-delay:0.25s">SPECTRA-SCAN AI — an adaptive smart-scan scheduler for</text><text y="92" class="tl in" style="animation-delay:0.33s">simulated spectrum surveillance.</text>
+<g transform="translate(0,104)"><g class="in" style="animation-delay:.45s"><g transform="translate(0,0)"><rect width="36.8" height="24" rx="12" fill="#39d353" fill-opacity=".12" stroke="#39d353" stroke-opacity=".35"/><text x="18.4" y="16.5" class="tag" text-anchor="middle">AI</text></g><g transform="translate(44.8,0)"><rect width="73.80000000000001" height="24" rx="12" fill="#39d353" fill-opacity=".12" stroke="#39d353" stroke-opacity=".35"/><text x="36.900000000000006" y="16.5" class="tag" text-anchor="middle">Signals</text></g><g transform="translate(126.60000000000001,0)"><rect width="96" height="24" rx="12" fill="#39d353" fill-opacity=".12" stroke="#39d353" stroke-opacity=".35"/><text x="48" y="16.5" class="tag" text-anchor="middle">Simulation</text></g></g></g>
+</g>
+<a href="https://github.com/Dev-2141/spectra-raw">
+<g transform="translate(772,36)"><g class="in" style="animation-delay:.3s">
+<rect width="92" height="104" rx="16" fill="#161b22" stroke="#39d353" stroke-width="1.5"/>
+<path d="M46 18 l14 16 h-28 z" fill="#39d353" class="arrow"/>
+<text x="46" y="68" class="up" text-anchor="middle">0</text>
+<text x="46" y="88" class="upl" text-anchor="middle">UPVOTE</text>
+</g></g>
+</a>
+<path d="M36 180 H864" stroke="#21262d"/>
+<g transform="translate(36,208)"><g class="in" style="animation-delay:.55s"><g transform="translate(0,0)"><text class="sv"><tspan class="si">★</tspan> 0</text><text y="18" class="s">stars</text></g><g transform="translate(118,0)"><text class="sv"><tspan class="si">⑂</tspan> 0</text><text y="18" class="s">forks</text></g><g transform="translate(236,0)"><text class="sv"><tspan class="si">◆</tspan> 11</text><text y="18" class="s">commits</text></g><g transform="translate(354,0)"><text class="sv"><tspan class="si">↑</tspan> 3 weeks</text><text y="18" class="s">since last ship</text></g></g></g>
+<g transform="translate(564,196)"><g class="in" style="animation-delay:.6s">
+<g clip-path="inset(0 round 4px)"><g class="grow"><rect x="0.0" y="0" width="209.5" height="8" fill="#3572A5"/><rect x="209.5" y="0" width="90.5" height="8" fill="#3178c6"/></g></g>
+<circle cx="5" cy="24" r="4" fill="#3572A5"/><text x="14" y="28" class="s">Python 70%</text><circle cx="105" cy="24" r="4" fill="#3178c6"/><text x="114" y="28" class="s">TypeScript 30%</text>
+</g></g>
+</svg>

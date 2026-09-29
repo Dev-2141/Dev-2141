@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250" width="900" height="250" role="img" aria-label="Edusphere launch card">
+<defs>
+<linearGradient id="logo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a371f7"/><stop offset="1" stop-color="#f778ba"/></linearGradient>
+<linearGradient id="edge" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#a371f7"/><stop offset=".35" stop-color="#30363d"/><stop offset=".65" stop-color="#30363d"/><stop offset="1" stop-color="#f778ba"/>
+<animateTransform attributeName="gradientTransform" type="rotate" values="0 .5 .5;360 .5 .5" dur="8s" repeatCount="indefinite"/>
+</linearGradient>
+<radialGradient id="glow" cx="0.12" cy="0.3" r="0.6"><stop offset="0" stop-color="#a371f7" stop-opacity=".18"/><stop offset="1" stop-color="#a371f7" stop-opacity="0"/></radialGradient>
+<clipPath id="card"><rect width="900" height="250" rx="18"/></clipPath>
+<clipPath id="logoClip"><rect width="104" height="104" rx="24"/></clipPath>
+</defs>
+<style>
+text { font-family: 'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif; fill: #e6edf3; }
+.eyebrow { font: 700 12px ConsolasFallback, Consolas, 'SFMono-Regular', Menlo, 'Liberation Mono', monospace; letter-spacing: 2.5px; fill: #a371f7; }
+.name { font-size: 34px; font-weight: 800; }
+.tl { font-size: 16.5px; fill: #adbac7; }
+.tag { font-size: 12px; font-weight: 600; fill: #a371f7; }
+.s { font-size: 12px; fill: #768390; }
+.sv { font-size: 17px; font-weight: 700; }
+.si { fill: #a371f7; }
+.mono { font-size: 42px; font-weight: 900; fill: #0d1117; }
+.up { font-size: 26px; font-weight: 800; }
+.upl { font: 700 10px ConsolasFallback, Consolas, 'SFMono-Regular', Menlo, 'Liberation Mono', monospace; letter-spacing: 2px; fill: #768390; }
+.live { animation: pulse 1.6s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes pulse { from { transform: scale(1); opacity: .7; } to { transform: scale(3.2); opacity: 0; } }
+.float { animation: float 5s ease-in-out infinite; }
+@keyframes float { 50% { transform: translateY(-6px); } }
+.shine { animation: shine 3.5s ease-in-out infinite; }
+@keyframes shine { 0%, 55% { transform: translateX(-140px) skewX(-20deg); } 100% { transform: translateX(160px) skewX(-20deg); } }
+.arrow { animation: bob 1.8s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-5px); } }
+.grow { transform-box: fill-box; transform-origin: left; animation: grow 1.4s cubic-bezier(.2,.8,.2,1) both .4s; }
+@keyframes grow { from { transform: scaleX(0); } }
+.cf { opacity: .55; animation: rise linear infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes rise { from { transform: translateY(0) rotate(0); } to { transform: translateY(-290px) rotate(540deg); } }
+.in { opacity: 0; animation: in .6s ease-out forwards; }
+@keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+</style>
+<g clip-path="url(#card)">
+<rect width="900" height="250" fill="#0d1117"/>
+<rect width="900" height="250" fill="url(#glow)"/>
+<rect x="46" y="260" width="6.2" height="10.0" rx="1" fill="#a371f7" class="cf" style="animation-delay:-2.42s;animation-duration:7.7s"/><rect x="697" y="260" width="7.1" height="11.4" rx="1" fill="#f778ba" class="cf" style="animation-delay:-2.00s;animation-duration:7.7s"/><rect x="482" y="260" width="6.1" height="9.7" rx="1" fill="#e3b341" class="cf" style="animation-delay:-4.43s;animation-duration:8.3s"/><rect x="128" y="260" width="5.5" height="8.8" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-2.29s;animation-duration:11.6s"/><rect x="762" y="260" width="4.2" height="6.7" rx="1" fill="#a371f7" class="cf" style="animation-delay:-3.70s;animation-duration:11.2s"/><rect x="398" y="260" width="5.8" height="9.3" rx="1" fill="#f778ba" class="cf" style="animation-delay:-5.74s;animation-duration:10.1s"/><rect x="365" y="260" width="4.6" height="7.3" rx="1" fill="#e3b341" class="cf" style="animation-delay:-4.02s;animation-duration:10.4s"/><rect x="72" y="260" width="3.6" height="5.8" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-6.31s;animation-duration:9.3s"/><rect x="619" y="260" width="6.1" height="9.7" rx="1" fill="#a371f7" class="cf" style="animation-delay:-8.25s;animation-duration:9.7s"/><rect x="598" y="260" width="3.1" height="5.0" rx="1" fill="#f778ba" class="cf" style="animation-delay:-5.18s;animation-duration:9.1s"/><rect x="218" y="260" width="6.0" height="9.6" rx="1" fill="#e3b341" class="cf" style="animation-delay:-2.71s;animation-duration:7.8s"/><rect x="391" y="260" width="4.6" height="7.4" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-6.63s;animation-duration:10.1s"/><rect x="325" y="260" width="4.1" height="6.6" rx="1" fill="#a371f7" class="cf" style="animation-delay:-4.55s;animation-duration:7.3s"/><rect x="457" y="260" width="5.1" height="8.1" rx="1" fill="#f778ba" class="cf" style="animation-delay:-6.38s;animation-duration:9.6s"/><rect x="308" y="260" width="7.0" height="11.2" rx="1" fill="#e3b341" class="cf" style="animation-delay:-5.90s;animation-duration:11.7s"/><rect x="347" y="260" width="4.3" height="6.8" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-2.83s;animation-duration:11.5s"/><rect x="404" y="260" width="4.7" height="7.5" rx="1" fill="#a371f7" class="cf" style="animation-delay:-1.58s;animation-duration:8.4s"/><rect x="777" y="260" width="4.6" height="7.4" rx="1" fill="#f778ba" class="cf" style="animation-delay:-5.98s;animation-duration:7.5s"/><rect x="415" y="260" width="7.9" height="12.7" rx="1" fill="#e3b341" class="cf" style="animation-delay:-8.66s;animation-duration:9.9s"/><rect x="467" y="260" width="3.4" height="5.4" rx="1" fill="#56d4dd" class="cf" style="animation-delay:-7.41s;animation-duration:12.0s"/><rect x="162" y="260" width="7.2" height="11.5" rx="1" fill="#a371f7" class="cf" style="animation-delay:-8.24s;animation-duration:7.7s"/><rect x="165" y="260" width="6.9" height="11.0" rx="1" fill="#f778ba" class="cf" style="animation-delay:-0.46s;animation-duration:11.4s"/>
+</g>
+<rect x="1" y="1" width="898" height="248" rx="17" fill="none" stroke="url(#edge)" stroke-width="2"/>
+<g transform="translate(36,36)"><g class="float">
+<g clip-path="url(#logoClip)">
+<rect width="104" height="104" fill="url(#logo)"/>
+<rect x="20" y="-20" width="40" height="150" fill="#fff" opacity=".25" class="shine"/>
+</g>
+<text x="52" y="67" class="mono" text-anchor="middle">E</text>
+</g></g>
+<g transform="translate(168,44)">
+<g class="in" style="animation-delay:.05s">
+<circle cx="5" cy="-4" r="5" fill="#a371f7" class="live"/><circle cx="5" cy="-4" r="5" fill="#a371f7"/>
+<text x="18" y="0" class="eyebrow">NOW LIVE · LAUNCHED SEPT 2026</text>
+</g>
+<text y="40" class="name in" style="animation-delay:.15s">Edusphere</text>
+<text y="70" class="tl in" style="animation-delay:0.25s">Learn anything, Coursera-style — curated YouTube courses in</text><text y="92" class="tl in" style="animation-delay:0.33s">one clean platform.</text>
+<g transform="translate(0,104)"><g class="in" style="animation-delay:.45s"><g transform="translate(0,0)"><rect width="66.4" height="24" rx="12" fill="#a371f7" fill-opacity=".12" stroke="#a371f7" stroke-opacity=".35"/><text x="33.2" y="16.5" class="tag" text-anchor="middle">EdTech</text></g><g transform="translate(74.4,0)"><rect width="73.80000000000001" height="24" rx="12" fill="#a371f7" fill-opacity=".12" stroke="#a371f7" stroke-opacity=".35"/><text x="36.900000000000006" y="16.5" class="tag" text-anchor="middle">Web App</text></g></g></g>
+</g>
+<a href="https://github.com/Dev-2141/Edusphere">
+<g transform="translate(772,36)"><g class="in" style="animation-delay:.3s">
+<rect width="92" height="104" rx="16" fill="#161b22" stroke="#a371f7" stroke-width="1.5"/>
+<path d="M46 18 l14 16 h-28 z" fill="#a371f7" class="arrow"/>
+<text x="46" y="68" class="up" text-anchor="middle">0</text>
+<text x="46" y="88" class="upl" text-anchor="middle">UPVOTE</text>
+</g></g>
+</a>
+<path d="M36 180 H864" stroke="#21262d"/>
+<g transform="translate(36,208)"><g class="in" style="animation-delay:.55s"><g transform="translate(0,0)"><text class="sv"><tspan class="si">★</tspan> 0</text><text y="18" class="s">stars</text></g><g transform="translate(118,0)"><text class="sv"><tspan class="si">⑂</tspan> 0</text><text y="18" class="s">forks</text></g><g transform="translate(236,0)"><text class="sv"><tspan class="si">◆</tspan> 3</text><text y="18" class="s">commits</text></g><g transform="translate(354,0)"><text class="sv"><tspan class="si">↑</tspan> 1 hour</text><text y="18" class="s">since last ship</text></g></g></g>
+<g transform="translate(564,196)"><g class="in" style="animation-delay:.6s">
+<g clip-path="inset(0 round 4px)"><g class="grow"><rect x="0.0" y="0" width="176.8" height="8" fill="#3178c6"/><rect x="176.8" y="0" width="66.3" height="8" fill="#663399"/><rect x="243.1" y="0" width="56.9" height="8" fill="#e34c26"/></g></g>
+<circle cx="5" cy="24" r="4" fill="#3178c6"/><text x="14" y="28" class="s">TypeScript 59%</text><circle cx="105" cy="24" r="4" fill="#663399"/><text x="114" y="28" class="s">CSS 22%</text><circle cx="205" cy="24" r="4" fill="#e34c26"/><text x="214" y="28" class="s">HTML 19%</text>
+</g></g>
+</svg>

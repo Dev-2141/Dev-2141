@@ -1,0 +1,25 @@
+{
+  "user": "Dev-2141",
+  "timezone": "Asia/Kolkata",
+  "neofetch": {
+    "OS": "Windows 11, Android, Arduino",
+    "Host": "Ernakulam, Kerala, India",
+    "Kernel": "Student Developer",
+    "IDE": "VS Code, Android Studio, Arduino IDE",
+    "Hobbies.Software": "AI agents, MCP servers, web apps",
+    "Hobbies.Hardware": "Arduino, spectrum sensing"
+  },
+  "launches": {
+    "hide": ["Dev-2141"],
+    "overrides": {
+      "Edusphere": {
+        "tagline": "Learn anything, Coursera-style — curated YouTube courses in one clean platform.",
+        "tags": ["EdTech", "Web App"]
+      },
+      "spectra-raw": {
+        "tagline": "SPECTRA-SCAN AI — an adaptive smart-scan scheduler for simulated spectrum surveillance.",
+        "tags": ["AI", "Signals", "Simulation"]
+      }
+    }
+  }
+}
