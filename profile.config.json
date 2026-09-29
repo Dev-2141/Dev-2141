@@ -1,6 +1,13 @@
 {
   "user": "Dev-2141",
   "timezone": "Asia/Kolkata",
+  "header": {
+    "phrases": [
+      "I build AI agents & MCP servers.",
+      "I ship web apps in TypeScript.",
+      "I write Python that talks to hardware."
+    ]
+  },
   "neofetch": {
     "OS": "Windows 11, Android, Arduino",
     "Host": "Ernakulam, Kerala, India",
@@ -10,15 +17,24 @@
     "Hobbies.Hardware": "Arduino, spectrum sensing"
   },
   "launches": {
-    "hide": ["Dev-2141"],
+    "hide": [
+      "Dev-2141"
+    ],
     "overrides": {
       "Edusphere": {
         "tagline": "Learn anything, Coursera-style — curated YouTube courses in one clean platform.",
-        "tags": ["EdTech", "Web App"]
+        "tags": [
+          "EdTech",
+          "Web App"
+        ]
       },
       "spectra-raw": {
         "tagline": "SPECTRA-SCAN AI — an adaptive smart-scan scheduler for simulated spectrum surveillance.",
-        "tags": ["AI", "Signals", "Simulation"]
+        "tags": [
+          "AI",
+          "Signals",
+          "Simulation"
+        ]
       }
     }
   }
