@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 170" width="440" height="170" role="img" aria-label="Edusphere">
+<defs>
+  <linearGradient id="b" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#a371f7"/><stop offset="50%" stop-color="#30363d"/><stop offset="100%" stop-color="#a371f7"/>
+    <animateTransform attributeName="gradientTransform" type="rotate" from="0 .5 .5" to="360 .5 .5" dur="5s" repeatCount="indefinite"/>
+  </linearGradient>
+</defs>
+<style>
+  .n{font:700 22px 'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif;fill:#e6edf3}
+  .d{font:14px 'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif;fill:#8b949e}
+  .l{font:13px 'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif;fill:#8b949e}
+  .shine{animation:shine 4s ease-in-out infinite}
+  @keyframes shine{0%,60%{transform:translateX(-200px)}100%{transform:translateX(640px)}}
+</style>
+<rect x="1.5" y="1.5" width="437" height="167" rx="12" fill="#0d1117" stroke="url(#b)" stroke-width="2"/>
+<g clip-path="inset(0 round 12px)"><rect class="shine" x="0" y="0" width="80" height="170" fill="#ffffff" opacity="0.035" transform="skewX(-20)"/></g>
+<path d="M24 30 h14 v18 h-14z M28 34 h6 M28 39 h6" stroke="#a371f7" stroke-width="2" fill="none" stroke-linejoin="round"/>
+<text x="48" y="46" class="n">Edusphere</text>
+<text x="24" y="82" class="d">A Coursera-style online learning platform with</text><text x="24" y="103" class="d">curated YouTube video courses.</text>
+<circle cx="30" cy="144" r="6" fill="#3178c6"/>
+<text x="42" y="149" class="l">TypeScript</text>
+<text x="416" y="149" class="l" text-anchor="end" fill="#a371f7" style="fill:#a371f7">view repo →</text>
+</svg>
