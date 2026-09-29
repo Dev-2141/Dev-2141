@@ -658,7 +658,14 @@ write("divider.svg", `${svgOpen(900, 64, "")}
   const readmeUrl = new URL("README.md", root);
   const readme = readFileSync(readmeUrl, "utf8");
   const block = launches.map((r) => `<a href="${r.url}"><img src="./generated/launch-${r.name}.svg" width="100%" alt="${r.name} — launch card"/></a>`).join("\n");
-  writeFileSync(readmeUrl, readme.replace(/(<!-- LAUNCHES:START -->)[\s\S]*?(<!-- LAUNCHES:END -->)/, `$1\n${block}\n$2`));
+  // Version stamp on every generated image so GitHub's image cache picks up each refresh.
+  const v = Date.now().toString(36);
+  writeFileSync(
+    readmeUrl,
+    readme
+      .replace(/(<!-- LAUNCHES:START -->)[\s\S]*?(<!-- LAUNCHES:END -->)/, `$1\n${block}\n$2`)
+      .replace(/(\.\/generated\/[\w.-]+\.svg)(\?v=\w+)?/g, `$1?v=${v}`),
+  );
 }
 
 console.log(`built: header, neofetch, ${launches.length} launch cards, toolbox, titles, divider, footer · LOC +${loc.add}/-${loc.del}`);
