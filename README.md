@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://github.com/Dev-2141?tab=repositories"><img src="./generated/header.svg?v=muq4lg71" width="100%" alt="Hey there, I'm Devapriyan G S — student developer from Ernakulam, Kerala"/></a>
+<a href="https://github.com/Dev-2141?tab=repositories"><img src="./generated/header.svg?v=murj5j1j" width="100%" alt="Hey there, I'm Devapriyan G S — student developer from Ernakulam, Kerala"/></a>
 
 <img src="https://img.shields.io/github/followers/Dev-2141?label=FOLLOWERS&style=for-the-badge&logo=github&logoColor=e9b949&color=3a1f73&labelColor=150e26" alt="followers"/>
 <img src="https://komarev.com/ghpvc/?username=Dev-2141&label=PROFILE%20VIEWS&style=for-the-badge&color=3a1f73&labelColor=150e26" alt="profile views"/>
@@ -11,29 +11,29 @@
 <br/>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./generated/neofetch-dark.svg?v=muq4lg71"/>
-  <source media="(prefers-color-scheme: light)" srcset="./generated/neofetch-light.svg?v=muq4lg71"/>
-  <img src="./generated/neofetch-dark.svg?v=muq4lg71" width="100%" alt="hebi@dev-2141 — colour ASCII portrait with live GitHub stats"/>
+  <source media="(prefers-color-scheme: dark)" srcset="./generated/neofetch-dark.svg?v=murj5j1j"/>
+  <source media="(prefers-color-scheme: light)" srcset="./generated/neofetch-light.svg?v=murj5j1j"/>
+  <img src="./generated/neofetch-dark.svg?v=murj5j1j" width="100%" alt="hebi@dev-2141 — colour ASCII portrait with live GitHub stats"/>
 </picture>
 
-<img src="./generated/divider.svg?v=muq4lg71" width="100%" alt=""/>
+<img src="./generated/divider.svg?v=murj5j1j" width="100%" alt=""/>
 
-<img src="./generated/title-launches.svg?v=muq4lg71" width="100%" alt="Fresh launches"/>
+<img src="./generated/title-launches.svg?v=murj5j1j" width="100%" alt="Fresh launches"/>
 
 <!-- LAUNCHES:START -->
-<a href="https://github.com/Dev-2141/Edusphere"><img src="./generated/launch-Edusphere.svg?v=muq4lg71" width="100%" alt="Edusphere — launch card"/></a>
-<a href="https://github.com/Dev-2141/spectra-raw"><img src="./generated/launch-spectra-raw.svg?v=muq4lg71" width="100%" alt="spectra-raw — launch card"/></a>
+<a href="https://github.com/Dev-2141/Edusphere"><img src="./generated/launch-Edusphere.svg?v=murj5j1j" width="100%" alt="Edusphere — launch card"/></a>
+<a href="https://github.com/Dev-2141/spectra-raw"><img src="./generated/launch-spectra-raw.svg?v=murj5j1j" width="100%" alt="spectra-raw — launch card"/></a>
 <!-- LAUNCHES:END -->
 
-<img src="./generated/divider.svg?v=muq4lg71" width="100%" alt=""/>
+<img src="./generated/divider.svg?v=murj5j1j" width="100%" alt=""/>
 
-<img src="./generated/title-toolbox.svg?v=muq4lg71" width="100%" alt="The royal toolbox"/>
+<img src="./generated/title-toolbox.svg?v=murj5j1j" width="100%" alt="The royal toolbox"/>
 
-<img src="./generated/toolbox.svg?v=muq4lg71" width="100%" alt="JavaScript, Go, C, C++, Java, HTML5, Python, PowerShell, Bash, TypeScript, React, React Native, Next.js, Node.js, NPM, FastAPI, Flask, Flutter, OpenGL, WebGL, Blender, AWS, Google Cloud, Apache, Nginx, Tor, Windows Terminal, Figma, Framer, Canva, Affinity Photo, MySQL, Firebase, Postgres, Supabase"/>
+<img src="./generated/toolbox.svg?v=murj5j1j" width="100%" alt="JavaScript, Go, C, C++, Java, HTML5, Python, PowerShell, Bash, TypeScript, React, React Native, Next.js, Node.js, NPM, FastAPI, Flask, Flutter, OpenGL, WebGL, Blender, AWS, Google Cloud, Apache, Nginx, Tor, Windows Terminal, Figma, Framer, Canva, Affinity Photo, MySQL, Firebase, Postgres, Supabase"/>
 
-<img src="./generated/divider.svg?v=muq4lg71" width="100%" alt=""/>
+<img src="./generated/divider.svg?v=murj5j1j" width="100%" alt=""/>
 
-<img src="./generated/title-activity.svg?v=muq4lg71" width="100%" alt="Activity, live"/>
+<img src="./generated/title-activity.svg?v=murj5j1j" width="100%" alt="Activity, live"/>
 
 <div align="center">
 
@@ -49,4 +49,4 @@
 
 <br/>
 
-<img src="./generated/footer.svg?v=muq4lg71" width="100%" alt="thanks for stopping by"/>
+<img src="./generated/footer.svg?v=murj5j1j" width="100%" alt="thanks for stopping by"/>
