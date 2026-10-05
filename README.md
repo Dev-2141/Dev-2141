@@ -1,43 +1,44 @@
 <div align="center">
 
-<a href="https://github.com/Dev-2141?tab=repositories"><img src="./generated/header.svg?v=muucjqsh" width="100%" alt="Hey there, I'm Devapriyan G S — student developer from Ernakulam, Kerala"/></a>
+<a href="https://github.com/Dev-2141?tab=repositories"><img src="./generated/header.svg?v=muvllybl" width="100%" alt="Devapriyan G S, aka Dedoo / Hebi"/></a>
 
-<img src="https://img.shields.io/github/followers/Dev-2141?label=FOLLOWERS&style=for-the-badge&logo=github&logoColor=e9b949&color=3a1f73&labelColor=150e26" alt="followers"/>
-<img src="https://komarev.com/ghpvc/?username=Dev-2141&label=PROFILE%20VIEWS&style=for-the-badge&color=3a1f73&labelColor=150e26" alt="profile views"/>
-<img src="https://img.shields.io/badge/ERNAKULAM-KERALA-e9b949?style=for-the-badge&labelColor=150e26" alt="Ernakulam, Kerala"/>
+<img src="https://img.shields.io/github/followers/Dev-2141?label=FOLLOWERS&style=for-the-badge&logo=github&logoColor=ff2b40&color=5e0010&labelColor=08080a" alt="followers"/>
+<img src="https://komarev.com/ghpvc/?username=Dev-2141&label=PROFILE%20VIEWS&style=for-the-badge&color=5e0010&labelColor=08080a" alt="profile views"/>
+<img src="https://img.shields.io/github/stars/Dev-2141?affiliations=OWNER&label=STARS&style=for-the-badge&logo=github&logoColor=ff2b40&color=5e0010&labelColor=08080a" alt="stars"/>
 
 </div>
 
 <br/>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./generated/neofetch-dark.svg?v=muucjqsh"/>
-  <source media="(prefers-color-scheme: light)" srcset="./generated/neofetch-light.svg?v=muucjqsh"/>
-  <img src="./generated/neofetch-dark.svg?v=muucjqsh" width="100%" alt="hebi@dev-2141 — colour ASCII portrait with live GitHub stats"/>
-</picture>
+<img src="./generated/neofetch.svg?v=muvllybl" width="100%" alt="hebi@dev-2141 — the stipple snake beside live GitHub stats"/>
 
-<img src="./generated/divider.svg?v=muucjqsh" width="100%" alt=""/>
+<img src="./generated/divider.svg?v=muvllybl" width="100%" alt=""/>
 
-<img src="./generated/title-launches.svg?v=muucjqsh" width="100%" alt="Fresh launches"/>
+<img src="./generated/title-analytics.svg?v=muvllybl" width="100%" alt="Venom analytics"/>
+
+<img src="./generated/analytics.svg?v=muvllybl" width="100%" alt="Contribution analytics: totals, streaks, a 365-day heatmap, weekday rhythm, languages, monthly contributions and commits by repo"/>
+
+<img src="./generated/divider.svg?v=muvllybl" width="100%" alt=""/>
+
+<img src="./generated/title-launches.svg?v=muvllybl" width="100%" alt="Fresh strikes"/>
 
 <!-- LAUNCHES:START -->
-<a href="https://github.com/Dev-2141/Edusphere"><img src="./generated/launch-Edusphere.svg?v=muucjqsh" width="100%" alt="Edusphere — launch card"/></a>
-<a href="https://github.com/Dev-2141/spectra-raw"><img src="./generated/launch-spectra-raw.svg?v=muucjqsh" width="100%" alt="spectra-raw — launch card"/></a>
+<a href="https://github.com/Dev-2141/THE-DAY"><img src="./generated/launch-THE-DAY.svg?v=muvllybl" width="100%" alt="THE-DAY — launch card"/></a>
+<a href="https://github.com/Dev-2141/Edusphere"><img src="./generated/launch-Edusphere.svg?v=muvllybl" width="100%" alt="Edusphere — launch card"/></a>
+<a href="https://github.com/Dev-2141/spectra-raw"><img src="./generated/launch-spectra-raw.svg?v=muvllybl" width="100%" alt="spectra-raw — launch card"/></a>
 <!-- LAUNCHES:END -->
 
-<img src="./generated/divider.svg?v=muucjqsh" width="100%" alt=""/>
+<img src="./generated/divider.svg?v=muvllybl" width="100%" alt=""/>
 
-<img src="./generated/title-toolbox.svg?v=muucjqsh" width="100%" alt="The royal toolbox"/>
+<img src="./generated/title-toolbox.svg?v=muvllybl" width="100%" alt="The arsenal"/>
 
-<img src="./generated/toolbox.svg?v=muucjqsh" width="100%" alt="JavaScript, Go, C, C++, Java, HTML5, Python, PowerShell, Bash, TypeScript, React, React Native, Next.js, Node.js, NPM, FastAPI, Flask, Flutter, OpenGL, WebGL, Blender, AWS, Google Cloud, Apache, Nginx, Tor, Windows Terminal, Figma, Framer, Canva, Affinity Photo, MySQL, Firebase, Postgres, Supabase"/>
+<img src="./generated/toolbox.svg?v=muvllybl" width="100%" alt="JavaScript, Go, C, C++, Java, HTML5, Python, PowerShell, Bash, TypeScript, React, React Native, Next.js, Node.js, NPM, FastAPI, Flask, Flutter, OpenGL, WebGL, Blender, AWS, Google Cloud, Apache, Nginx, Tor, Windows Terminal, Figma, Framer, Canva, Affinity Photo, MySQL, Firebase, Postgres, Supabase"/>
 
-<img src="./generated/divider.svg?v=muucjqsh" width="100%" alt=""/>
+<img src="./generated/divider.svg?v=muvllybl" width="100%" alt=""/>
 
-<img src="./generated/title-activity.svg?v=muucjqsh" width="100%" alt="Activity, live"/>
+<img src="./generated/title-activity.svg?v=muvllybl" width="100%" alt="The hunt, live"/>
 
 <div align="center">
-
-<img src="https://streak-stats.demolab.com?user=Dev-2141&hide_border=true&border_radius=28&background=150e26&stroke=3a1f73&ring=e9b949&fire=e9b949&currStreakNum=fff8ec&sideNums=fff8ec&currStreakLabel=e9b949&sideLabels=c6b4ff&dates=9d85ff" width="100%" alt="GitHub streak"/>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dev-2141/Dev-2141/output/snake-dark.svg"/>
@@ -49,4 +50,4 @@
 
 <br/>
 
-<img src="./generated/footer.svg?v=muucjqsh" width="100%" alt="thanks for stopping by"/>
+<img src="./generated/footer.svg?v=muvllybl" width="100%" alt="thanks for stopping by"/>

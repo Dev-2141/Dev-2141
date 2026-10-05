@@ -1,11 +1,10 @@
-// Builds every SVG in generated/ from live GitHub data, in the Edusphere design language
-// with a royal palette. Runs daily in .github/workflows/build.yml.
-// Locally: GITHUB_TOKEN=$(gh auth token) node scripts/build.mjs
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+// Builds every SVG in generated/ from live GitHub data, in a black-and-blood snake theme.
+// The three snakes (stipple, sketch, viper) live in assets/snake/ and are embedded into each card.
+// Runs daily in .github/workflows/build.yml. Locally: GITHUB_TOKEN=$(gh auth token) node scripts/build.mjs
+import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from "node:fs";
 
 const root = new URL("../", import.meta.url);
 const config = JSON.parse(readFileSync(new URL("profile.config.json", root)));
-const portrait = JSON.parse(readFileSync(new URL("assets/portrait.json", root)));
 const icons = JSON.parse(readFileSync(new URL("assets/icons/icons.json", root)));
 const OUT = new URL("generated/", root);
 mkdirSync(OUT, { recursive: true });
@@ -15,20 +14,20 @@ const USER = config.user;
 
 /* ---------------------------------------------------------------- design */
 
-// Edusphere tokens, re-cut in royal jewel tones.
+// Deadly black, royal blood red, bone white.
 const C = {
-  ink: "#150e26", ink2: "#1f1537", royal: "#3a1f73", amethyst: "#6b44c9",
-  lilac: "#c6b4ff", lilacLt: "#e1d7ff", lilacDk: "#9d85ff",
-  gold: "#e9b949", goldLt: "#ffe08f", goldDk: "#a87a12",
-  cream: "#fff8ec", paper: "#f4ecdd",
-  crimson: "#c0304f", rose: "#ff8da0", sapphire: "#2f4fd8", emerald: "#1f7a57", mint: "#a8f0d4",
+  void: "#030303", ink: "#08080a", ink2: "#111114", ash: "#1d1d21", smoke: "#2c2c31",
+  bone: "#f1ebe6", boneDk: "#a8a29e", mute: "#6d6866",
+  blood: "#b3001e", bloodLt: "#e3122f", bloodDk: "#5e0010", ember: "#ff2b40", wine: "#2a0008",
 };
+const HEAT = ["#161619", "#4a0711", "#7d0a1c", "#b5102a", "#ff2b40"];
+const RAMP = [C.ember, C.blood, C.bone, C.bloodDk, C.boneDk, C.mute];
 const EASE_OUT = "cubic-bezier(.16,1,.3,1)";
 const EASE_POP = "cubic-bezier(.34,1.56,.64,1)";
 
 const FONT_FILES = {
-  display: ["Bricolage", 800, "bricolage-800"], displaySemi: ["Bricolage", 600, "bricolage-600"],
-  hand: ["Caveat", 700, "caveat-700"], body: ["DM Sans", 400, "dmsans-400"], bodyBold: ["DM Sans", 700, "dmsans-700"],
+  display: ["Cinzel", 900, "cinzel-900"], displaySemi: ["Cinzel", 600, "cinzel-600"],
+  goth: ["Pirata One", 400, "pirata-400"], body: ["DM Sans", 400, "dmsans-400"], bodyBold: ["DM Sans", 700, "dmsans-700"],
   mono: ["DM Mono", 400, "dmmono-400"], monoBold: ["DM Mono", 500, "dmmono-500"],
 };
 const fontCache = {};
@@ -42,8 +41,8 @@ function fonts(...keys) {
     .join("");
 }
 const F = {
-  display: "'Bricolage', 'Arial Black', sans-serif",
-  hand: "'Caveat', 'Segoe Print', cursive",
+  display: "'Cinzel', 'Trajan Pro', Georgia, serif",
+  goth: "'Pirata One', 'Old English Text MT', serif",
   body: "'DM Sans', 'Segoe UI', sans-serif",
   mono: "'DM Mono', Consolas, monospace",
 };
@@ -52,28 +51,140 @@ const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 const write = (name, svg) => writeFileSync(new URL(name, OUT), svg.replace(/\n\s+/g, "\n"));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const svgOpen = (W, H, label) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(label)}">`;
+const n1 = (v) => +v.toFixed(1);
 
-// A butterfly facing +x, centred on 0,0; wings fold on the y axis. Colours from the portrait.
-function butterfly(wing, wing2, dur = 0.32) {
-  const half = `<path d="M1 0 C0 -9 9 -20 17 -15 C22 -11 15 -3 1 0Z" fill="${wing}"/><path d="M1 0 C-9 -3 -15 -13 -7 -15 C-2 -16 1 -7 1 0Z" fill="${wing2}"/><circle cx="12" cy="-12" r="2" fill="${C.cream}" opacity=".85"/>`;
-  return `<g><g style="animation:flap ${dur}s ease-in-out infinite alternate">${half}<g transform="scale(1,-1)">${half}</g></g>
-    <path d="M-7 0 H9" stroke="${C.ink}" stroke-width="3" stroke-linecap="round"/><path d="M9 0 l6 -4 M9 0 l6 4" stroke="${C.ink}" stroke-width="1" fill="none"/></g>`;
+// Deterministic randomness, so a rebuild only changes when the data does.
+function rng(seed) {
+  return () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
-const FLAP = `@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.18)}}`;
-const flight = (path, dur, begin, b) =>
-  `<g><animateMotion dur="${dur}s" begin="${begin}s" repeatCount="indefinite" rotate="auto" path="${path}"/>${b}</g>`;
 
-// Four-point sparkle.
-const sparkle = (x, y, s, col, delay) =>
-  `<g transform="translate(${x},${y}) scale(${s})"><path d="M0 -10 C1 -2 2 -1 10 0 C2 1 1 2 0 10 C-1 2 -2 1 -10 0 C-2 -1 -1 -2 0 -10Z" fill="${col}" class="tw" style="animation-delay:${delay}s"/></g>`;
-const TWINKLE = `.tw{transform-box:fill-box;transform-origin:center;animation:tw 2.8s ease-in-out infinite}@keyframes tw{0%,100%{transform:scale(.2) rotate(0);opacity:.2}50%{transform:scale(1) rotate(90deg);opacity:1}}`;
+/* ---------------------------------------------------------------- snakes */
 
-// Drawn crown, centred on 0,0.
-const crown = (s = 1) => `<g transform="scale(${s})">
-  <path d="M-26 12 L-30 -14 L-14 -1 L0 -22 L14 -1 L30 -14 L26 12 Z" fill="${C.gold}" stroke="${C.goldDk}" stroke-width="2" stroke-linejoin="round"/>
-  <rect x="-27" y="12" width="54" height="8" rx="3" fill="${C.goldDk}"/>
-  <circle cx="0" cy="3" r="4.5" fill="${C.crimson}"/><circle cx="-15" cy="6" r="3" fill="${C.sapphire}"/><circle cx="15" cy="6" r="3" fill="${C.emerald}"/>
-  <circle cx="-30" cy="-14" r="3" fill="${C.goldLt}"/><circle cx="0" cy="-22" r="3" fill="${C.goldLt}"/><circle cx="30" cy="-14" r="3" fill="${C.goldLt}"/></g>`;
+const asset = (file, mime) => `data:${mime};base64,${readFileSync(new URL(`assets/snake/${file}`, root)).toString("base64")}`;
+const IMG = {
+  stipple: [asset("stipple.jpg", "image/jpeg"), 300, 532],
+  stippleSq: [asset("stipple-sq.jpg", "image/jpeg"), 420, 420],
+  sketch: [asset("sketch.jpg", "image/jpeg"), 240, 557],
+  viper: [asset("viper.png", "image/png"), 420, 386],
+};
+// Each snake as a luminance mask in bounding-box units: any shape with mask="url(#m-viper)" becomes that
+// snake, filled with whatever colour or gradient the shape has.
+const snakeMasks = (...keys) =>
+  keys.map((k) => `<mask id="m-${k}" maskContentUnits="objectBoundingBox" x="0" y="0" width="1" height="1"><image href="${IMG[k][0]}" width="1" height="1" preserveAspectRatio="none"/></mask>`).join("");
+// A snake at x,y, `w` wide, painted with `fill`.
+const snake = (k, x, y, w, fill, attrs = "") => `<rect x="${n1(x)}" y="${n1(y)}" width="${n1(w)}" height="${n1((w * IMG[k][2]) / IMG[k][1])}" fill="${fill}" mask="url(#m-${k})" ${attrs}/>`;
+// The viper's eyes, relative to its box (0..1).
+const VIPER_EYES = [[0.24, 0.245, 28], [0.76, 0.245, -28]];
+const viperEyes = (x, y, w, r = 1) => {
+  const h = (w * IMG.viper[2]) / IMG.viper[1];
+  return VIPER_EYES.map(([ex, ey, rot]) => `<g transform="translate(${n1(x + ex * w)},${n1(y + ey * h)}) rotate(${rot})"><ellipse rx="${n1(w * 0.05 * r)}" ry="${n1(w * 0.016 * r)}" fill="${C.ember}" filter="url(#glow)" class="eye"/><ellipse rx="${n1(w * 0.035 * r)}" ry="${n1(w * 0.009 * r)}" fill="#ffd9dc" class="eye"/></g>`).join("");
+};
+
+// A hand-sketched snake (the second reference): a bundle of jittery white outlines with a red scribble
+// down the spine. It slithers in place by morphing between phase-shifted frames.
+function sketchSnake({ len = 420, amp = 16, waves = 1.6, width = 9, seed = 1, frames = 8, dur = 2.4, strokes = 6 }) {
+  const N = 46;
+  const outline = (phase, jit) => {
+    const spine = [];
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const env = 0.35 + 0.65 * Math.sin(Math.PI * Math.min(1, t * 1.15));
+      spine.push([t * len, amp * env * Math.sin(Math.PI * 2 * waves * t - phase)]);
+    }
+    const side = (s) =>
+      spine.map(([x, y], i) => {
+        const [x0, y0] = spine[Math.max(0, i - 1)], [x1, y1] = spine[Math.min(N, i + 1)];
+        const dx = x1 - x0, dy = y1 - y0, l = Math.hypot(dx, dy) || 1;
+        const t = i / N;
+        let w = width * Math.min(1, 0.12 + t * 1.6);
+        if (t > 0.9) w *= 1 + 1.3 * Math.sin(((t - 0.9) / 0.1) * Math.PI * 0.85); // the head
+        if (t > 0.985) w *= 0.4;
+        w += jit(i, s);
+        return [x - (dy / l) * w * s, y + (dx / l) * w * s];
+      });
+    const pts = [...side(1), ...side(-1).reverse()];
+    return pts.map(([x, y], i) => `${i ? "L" : "M"}${n1(x)} ${n1(y)}`).join("") + "Z";
+  };
+  const scribble = (phase) => {
+    let d = "";
+    for (let i = 0; i <= 120; i++) {
+      const t = 0.04 + (i / 120) * 0.9;
+      const env = 0.35 + 0.65 * Math.sin(Math.PI * Math.min(1, t * 1.15));
+      const x = t * len + Math.cos(i * 1.7) * width * 0.35;
+      const y = amp * env * Math.sin(Math.PI * 2 * waves * t - phase) + Math.sin(i * 1.7) * width * 0.4;
+      d += `${i ? "L" : "M"}${n1(x)} ${n1(y)}`;
+    }
+    return d;
+  };
+  const phases = Array.from({ length: frames + 1 }, (_, f) => (f / frames) * Math.PI * 2);
+  const r = rng(seed);
+  let out = "";
+  for (let s = 0; s < strokes; s++) {
+    const a = r() * 6, b = 0.8 + r() * 1.6, c = (r() - 0.5) * 2.4;
+    const jit = (i, side) => c + Math.sin(i * 0.35 * b + a + side) * 1.3;
+    const ds = phases.map((p) => outline(p, jit));
+    out += `<path d="${ds[0]}" fill="none" stroke="${C.bone}" stroke-opacity="${(0.35 + r() * 0.5).toFixed(2)}" stroke-width="${(0.6 + r() * 0.7).toFixed(2)}" stroke-linejoin="round"><animate attributeName="d" dur="${dur}s" repeatCount="indefinite" values="${ds.join(";")}"/></path>`;
+  }
+  const sc = phases.map(scribble);
+  out += `<path d="${sc[0]}" fill="none" stroke="${C.bloodLt}" stroke-width=".9" stroke-opacity=".9"><animate attributeName="d" dur="${dur}s" repeatCount="indefinite" values="${sc.join(";")}"/></path>`;
+  return `<g>${out}</g>`;
+}
+
+/* ------------------------------------------------------------ atmosphere */
+
+const rgb = (hex) => [1, 3, 5].map((i) => (parseInt(hex.slice(i, i + 2), 16) / 255).toFixed(3));
+// Fractal-noise smoke tinted `col`. Put it on an oversized rect and drift the rect.
+const smokeFilter = (id, col, seed, freq = "0.0045 0.012", k = 2.6, c = 1.2) => {
+  const [r, g, b] = rgb(col);
+  return `<filter id="${id}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="${freq}" numOctaves="4" seed="${seed}"/>
+    <feColorMatrix values="0 0 0 0 ${r} 0 0 0 0 ${g} 0 0 0 0 ${b} ${k} 0 0 0 ${-c}"/></filter>`;
+};
+const COMMON_DEFS = `
+  <filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="9"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .075 0"/></filter>
+  <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3.5"/></filter>
+  <filter id="haze" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+  <radialGradient id="vig" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".85"/></radialGradient>
+  <linearGradient id="boneBlood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.bone}"/><stop offset=".55" stop-color="#e8c9c9"/><stop offset="1" stop-color="${C.blood}"/></linearGradient>
+  <linearGradient id="bloodFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.bloodLt}"/><stop offset="1" stop-color="${C.bloodDk}"/></linearGradient>`;
+// Two drifting smoke banks, feathered top and bottom so they never show an edge.
+const smokeLayers = (W, H, a = 0.55) => `
+    <g mask="url(#feather)" opacity="${a}"><rect x="${-W * 0.4}" y="${H * 0.1}" width="${W * 1.8}" height="${H}" filter="url(#smokeA)" class="driftA"/></g>
+    <g mask="url(#feather)" opacity="${a * 0.9}"><rect x="${-W * 0.4}" y="${H * 0.3}" width="${W * 1.8}" height="${H * 0.8}" filter="url(#smokeB)" class="driftB"/></g>`;
+const SMOKE_DEFS = `${smokeFilter("smokeA", "#8f8a88", 3, "0.0045 0.012", 2.6, 1.42)}${smokeFilter("smokeB", C.blood, 11, "0.006 0.016", 2.4, 1.3)}
+  <linearGradient id="featherG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000"/><stop offset=".35" stop-color="#fff"/><stop offset=".8" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+  <mask id="feather" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#featherG)"/></mask>`;
+const BASE_CSS = `
+    .driftA{animation:driftA 26s ease-in-out infinite alternate}
+    .driftB{animation:driftB 34s ease-in-out infinite alternate}
+    @keyframes driftA{from{transform:translate(0,0)}to{transform:translate(-${180}px,-24px)}}
+    @keyframes driftB{from{transform:translate(-160px,10px)}to{transform:translate(40px,-30px)}}
+    .eye{animation:eye 5s ease-in-out infinite}
+    @keyframes eye{0%,44%,52%,100%{opacity:1}48%{opacity:.08}}
+    .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 1.8s ease-out infinite}
+    @keyframes pulse{from{transform:scale(1);opacity:.8}to{transform:scale(3);opacity:0}}
+    .up{opacity:0;animation:up .9s ${EASE_OUT} forwards}
+    @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+    .scrib{stroke-dasharray:600;stroke-dashoffset:600;animation:draw 1.3s ${EASE_OUT} .5s forwards}
+    @keyframes draw{to{stroke-dashoffset:0}}`;
+// Embers rising through the smoke.
+function embers(n, W, H, seed) {
+  const r = rng(seed);
+  return Array.from({ length: n }, () => {
+    const x = (r() * W).toFixed(0), s = (0.6 + r() * 1.6).toFixed(1), d = (6 + r() * 8).toFixed(1), dl = (-r() * 14).toFixed(1);
+    const dx = ((r() - 0.5) * 90).toFixed(0);
+    return `<circle cx="${x}" cy="${H + 6}" r="${s}" fill="${r() > 0.3 ? C.ember : C.bone}" class="ember" style="animation-duration:${d}s;animation-delay:${dl}s;--dx:${dx}px"/>`;
+  }).join("");
+}
+const EMBER_CSS = (H) => `.ember{opacity:0;animation:ember linear infinite}@keyframes ember{0%{opacity:0;transform:translate(0,0)}12%{opacity:.95}70%{opacity:.5}100%{opacity:0;transform:translate(var(--dx),-${H + 20}px)}}`;
+const frameEdge = (W, H, rx = 22) => `<rect width="${W}" height="${H}" fill="url(#vig)"/><rect width="${W}" height="${H}" filter="url(#grain)"/>`;
+const border = (W, H, rx = 22) => `<rect x="1" y="1" width="${W - 2}" height="${H - 2}" rx="${rx - 1}" fill="none" stroke="${C.blood}" stroke-opacity=".45" stroke-width="1.5"/>
+  <path d="M14 40V14H40M${W - 40} 14H${W - 14}V40M${W - 14} ${H - 40}V${H - 14}H${W - 40}M40 ${H - 14}H14V${H - 40}" fill="none" stroke="${C.bloodLt}" stroke-width="2" stroke-linecap="square" opacity=".8"/>`;
 
 /* ------------------------------------------------------------------ data */
 
@@ -93,12 +204,16 @@ async function graphql(query, variables) {
   return data;
 }
 
+const DAYS = `weeks { contributionDays { date contributionCount } }`;
 const { user } = await graphql(
   `query($login: String!) {
     user(login: $login) {
       login createdAt
       followers { totalCount }
-      contributionsCollection { contributionYears contributionCalendar { totalContributions } }
+      contributionsCollection {
+        contributionYears totalCommitContributions totalPullRequestContributions totalIssueContributions totalRepositoryContributions
+        contributionCalendar { totalContributions ${DAYS} }
+      }
       repositoriesContributedTo(first: 1, includeUserRepositories: false, contributionTypes: [COMMIT, PULL_REQUEST, REPOSITORY]) { totalCount }
       repositories(first: 100, ownerAffiliations: OWNER, privacy: PUBLIC, orderBy: { field: PUSHED_AT, direction: DESC }) {
         nodes {
@@ -115,7 +230,7 @@ const { user } = await graphql(
 const years = user.contributionsCollection.contributionYears;
 const yearly = await graphql(
   `query($login: String!) { user(login: $login) { ${years
-    .map((y) => `y${y}: contributionsCollection(from: "${y}-01-01T00:00:00Z", to: "${y}-12-31T23:59:59Z") { contributionCalendar { totalContributions } }`)
+    .map((y) => `y${y}: contributionsCollection(from: "${y}-01-01T00:00:00Z", to: "${y}-12-31T23:59:59Z") { contributionCalendar { totalContributions ${DAYS} } }`)
     .join("\n")} } }`,
   { login: USER },
 );
@@ -169,7 +284,36 @@ function wrap(text, max) {
   return [...lines, line.trim()].filter(Boolean);
 }
 const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: config.timezone });
+const todayISO = new Date().toLocaleDateString("en-CA", { timeZone: config.timezone });
 const launches = repos.filter((r) => !config.launches.hide.includes(r.name) && !r.isArchived);
+const commitsOf = (r) => r.defaultBranchRef?.target.history.totalCount ?? 0;
+
+// Every contribution day since the account began, plus the last-365-days calendar.
+const dayMap = new Map();
+for (const y of years) for (const w of yearly.user[`y${y}`].contributionCalendar.weeks) for (const d of w.contributionDays) if (d.date <= todayISO) dayMap.set(d.date, d.contributionCount);
+const allDays = [...dayMap.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+const calWeeks = user.contributionsCollection.contributionCalendar.weeks.map((w) => w.contributionDays.filter((d) => d.date <= todayISO));
+const lastYear = calWeeks.flat();
+const lastYearTotal = lastYear.reduce((n, d) => n + d.contributionCount, 0);
+const streaks = (() => {
+  let longest = 0, run = 0, longestEnd = null;
+  for (const [date, c] of allDays) {
+    run = c > 0 ? run + 1 : 0;
+    if (run > longest) { longest = run; longestEnd = date; }
+  }
+  let current = 0, i = allDays.length - 1;
+  if (i >= 0 && allDays[i][1] === 0) i--; // today isn't over yet
+  for (; i >= 0 && allDays[i][1] > 0; i--) current++;
+  return { current, longest, longestEnd };
+})();
+const bestDay = allDays.reduce((b, d) => (d[1] > b[1] ? d : b), ["", 0]);
+const activeDays = lastYear.filter((d) => d.contributionCount > 0).length;
+const shortDate = (iso) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const langBytes = (() => {
+  const bytes = {};
+  for (const r of repos) for (const e of r.languages.edges) bytes[e.node.name] = (bytes[e.node.name] ?? 0) + e.size;
+  return Object.entries(bytes).sort((a, b) => b[1] - a[1]);
+})();
 
 /* ---------------------------------------------------------------- header */
 {
@@ -177,134 +321,129 @@ const launches = repos.filter((r) => !config.launches.hide.includes(r.name) && !
   const phrases = config.header.phrases;
   const P = 3.6;
   const lead = phrases
-    .map((p, i) => `<text x="0" y="0" class="lead" style="animation-delay:${(1.4 + i * P).toFixed(1)}s">${esc(p)}</text>`)
+    .map((p, i) => `<text x="0" y="0" class="lead" style="animation-delay:${(1.4 + i * P).toFixed(1)}s"><tspan class="pr">›</tspan> ${esc(p)}</text>`)
     .join("");
-  const seal = "HEBI ✦ ERNAKULAM ✦ KERALA ✦ INDIA ✦ ";
-  write("header.svg", `${svgOpen(W, H, "Devapriyan G S")}
+  const cx = 722, cy = 190, R = 116;
+  const orbit = Array.from({ length: 8 }, (_, k) => `<g transform="rotate(${k * 45}) translate(0,${-R - 34})">${snake("viper", -11, -10, 22, k % 2 ? C.bloodDk : C.blood)}</g>`).join("");
+  const drips = [[60, 18, 0], [190, 26, 0.6], [318, 14, 1.2], [402, 22, 0.3]]
+    .map(([x, h, d]) => `<path d="M${x} 6 q2 ${h * 0.6} 0 ${h} a3 3 0 1 1 -1 0 q-1 ${-h * 0.4} 1 ${-h}z" fill="${C.blood}" class="drip" style="animation-delay:${(1.8 + d).toFixed(1)}s"/>`)
+    .join("");
+  write("header.svg", `${svgOpen(W, H, "Devapriyan G S, aka Dedoo / Hebi")}
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${C.ink}"/><stop offset=".6" stop-color="#241446"/><stop offset="1" stop-color="${C.royal}"/></linearGradient>
-    <radialGradient id="sun"><stop offset="0" stop-color="${C.goldLt}" stop-opacity=".9"/><stop offset=".35" stop-color="${C.gold}" stop-opacity=".35"/><stop offset="1" stop-color="${C.gold}" stop-opacity="0"/></radialGradient>
-    <linearGradient id="foil" x1="0" x2="1"><stop offset="0" stop-color="${C.goldDk}"/><stop offset=".45" stop-color="${C.goldLt}"/><stop offset=".55" stop-color="${C.gold}"/><stop offset="1" stop-color="${C.goldDk}"/>
-      <animateTransform attributeName="gradientTransform" type="translate" values="-1 0;1 0" dur="4s" repeatCount="indefinite"/></linearGradient>
-    <clipPath id="frame"><rect width="${W}" height="${H}" rx="28"/></clipPath>
-    <clipPath id="line1"><rect x="0" y="-80" width="700" height="100"/></clipPath>
-    <path id="ring" d="M0 -78 a78 78 0 1 1 -0.1 0"/>
+    ${COMMON_DEFS}${SMOKE_DEFS}${snakeMasks("stippleSq", "viper")}
+    <radialGradient id="pool" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="${C.blood}" stop-opacity=".55"/><stop offset=".5" stop-color="${C.bloodDk}" stop-opacity=".25"/><stop offset="1" stop-color="${C.bloodDk}" stop-opacity="0"/></radialGradient>
+    <linearGradient id="name" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="${C.bone}"/><stop offset="1" stop-color="${C.boneDk}"/></linearGradient>
+    <clipPath id="frame"><rect width="${W}" height="${H}" rx="22"/></clipPath>
+    <clipPath id="dp"><circle r="${R}"/></clipPath>
+    <clipPath id="line1"><rect x="-10" y="-70" width="640" height="90"/></clipPath>
   </defs>
   <style>
-    ${fonts("display", "hand", "body", "bodyBold")}
-    .name{font:800 76px ${F.display};fill:${C.cream};letter-spacing:-1.5px}
-    .dot{fill:${C.gold}}
-    .hand{font:700 30px ${F.hand};fill:${C.gold}}
-    .lead{font:400 19px ${F.body};fill:${C.lilacLt};opacity:0;animation:cycle ${P * phrases.length}s ${EASE_OUT} infinite}
-    @keyframes cycle{0%{opacity:0;transform:translateY(14px)}5%,28%{opacity:1;transform:none}33%,100%{opacity:0;transform:translateY(-10px)}}
-    .btn{font:700 15px ${F.body};fill:${C.ink}}
-    .seal{font:600 12.5px ${F.body};letter-spacing:3.2px;fill:${C.gold}}
+    ${fonts("display", "goth", "mono")}
+    .name{font:900 50px ${F.display};fill:url(#name);letter-spacing:2px}
+    .nameGlow{font:900 50px ${F.display};fill:${C.blood};letter-spacing:2px;animation:flick 4s steps(1) infinite}
+    @keyframes flick{0%,100%{opacity:.9}41%{opacity:.3}43%{opacity:.95}71%{opacity:.5}72%{opacity:.9}}
+    .goth{font:400 31px ${F.goth};fill:${C.bloodLt}}
+    .lead{font:400 16px ${F.mono};fill:${C.boneDk};opacity:0;animation:cycle ${P * phrases.length}s ${EASE_OUT} infinite}
+    .pr{fill:${C.bloodLt}}
+    @keyframes cycle{0%{opacity:0;transform:translateX(-14px)}5%,28%{opacity:1;transform:none}33%,100%{opacity:0;transform:translateX(10px)}}
+    .aka{font:400 13px ${F.mono};fill:${C.bone};letter-spacing:2.4px}
+    .aka .r{fill:${C.bloodLt}}
     .rise{animation:rise 1.3s ${EASE_OUT} both}
-    @keyframes rise{from{transform:translateY(100px)}}
-    .fade{opacity:0;animation:fade .9s ${EASE_OUT} forwards}
-    @keyframes fade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-    .scrib{stroke-dasharray:260;stroke-dashoffset:260;animation:draw 1.1s ${EASE_OUT} 1.1s forwards}
-    @keyframes draw{to{stroke-dashoffset:0}}
-    .pop{animation:pop .9s ${EASE_POP} both 1.6s}
-    @keyframes pop{from{transform:scale(0) rotate(-20deg)}}
-    .bob{animation:bob 3s ease-in-out infinite}
-    @keyframes bob{50%{transform:translateY(-4px)}}
-    .spin{animation:spin 26s linear infinite}
+    @keyframes rise{from{transform:translateY(90px)}}
+    .fade{opacity:0;animation:fade 1s ${EASE_OUT} forwards}
+    @keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+    .drip{transform-box:fill-box;transform-origin:top;transform:scaleY(0);animation:drip 6s ease-in infinite}
+    @keyframes drip{0%{transform:scaleY(0)}30%{transform:scaleY(1)}80%{transform:scaleY(1.25);opacity:1}100%{transform:scaleY(1.4);opacity:0}}
+    .breathe{animation:breathe 5s ease-in-out infinite}
+    @keyframes breathe{50%{transform:scale(1.035)}}
+    .poolP{animation:poolP 4s ease-in-out infinite}
+    @keyframes poolP{50%{opacity:.55}}
+    .spin{animation:spin 40s linear infinite}.spinR{animation:spin 24s linear infinite reverse}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .crown{animation:crown 3.4s ease-in-out infinite}
-    @keyframes crown{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(4deg) translateY(-5px)}}
-    .blob1{animation:drift 14s ease-in-out infinite alternate}
-    .blob2{animation:drift 18s ease-in-out infinite alternate-reverse}
-    @keyframes drift{to{transform:translate(-40px,14px) scale(1.04)}}
-    .sun{animation:sun 5s ease-in-out infinite}
-    @keyframes sun{50%{opacity:.7}}
-    ${TWINKLE} ${FLAP}
+    .ring{animation:ring 3s ease-in-out infinite}
+    @keyframes ring{50%{stroke-opacity:.25}}
+    .sketch{animation:sk 18s ease-in-out infinite alternate}
+    @keyframes sk{to{transform:translate(60px,-8px)}}
+    .caret{animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}
+    ${BASE_CSS} ${EMBER_CSS(H)}
   </style>
   <g clip-path="url(#frame)">
-    <rect width="${W}" height="${H}" fill="url(#bg)"/>
-    <circle cx="70" cy="40" r="170" fill="url(#sun)" class="sun"/>
-    <path class="blob1" fill="${C.amethyst}" opacity=".35" d="M-60 300C80 190 210 330 360 260s220-200 400-150 260 150 260 150V460H-60z"/>
-    <path class="blob2" fill="${C.sapphire}" opacity=".22" d="M380 460c30-120 160-190 300-170s260-50 260-50v220z"/>
-    <path class="blob1" fill="${C.lilacDk}" opacity=".18" d="M-40 420c150-80 240 20 420-40s250-150 430-100 170 90 170 90v150H-40z"/>
-    ${sparkle(470, 70, 0.9, C.goldLt, 0)}${sparkle(610, 320, 0.6, C.gold, 0.9)}${sparkle(840, 60, 0.7, C.goldLt, 1.6)}${sparkle(40, 250, 0.5, C.lilac, 2.1)}${sparkle(560, 30, 0.45, C.lilac, 1.2)}
+    <rect width="${W}" height="${H}" fill="${C.void}"/>
+    <circle cx="${cx}" cy="${cy}" r="260" fill="url(#pool)" class="poolP"/>
+    <g class="sketch" opacity=".16"><image href="${IMG.sketch[0]}" width="${IMG.sketch[1]}" height="${IMG.sketch[2]}" transform="translate(-40,372) rotate(-90) scale(.62)" style="mix-blend-mode:screen"/></g>
+    ${smokeLayers(W, H, 0.5)}
+    ${embers(26, W, H, 7)}
 
-    <g transform="translate(56,86) rotate(-4)"><text class="hand fade" style="animation-delay:.2s">hey there, I'm</text></g>
-    <g transform="translate(56,178)" clip-path="url(#line1)"><text class="name rise" style="animation-delay:.35s">Devapriyan G S<tspan class="dot">.</tspan></text></g>
-    <g transform="translate(58,196)"><path d="M0 8c90-14 190-16 290-4s130 6 190-8" fill="none" stroke="${C.crimson}" stroke-width="5" stroke-linecap="round" class="scrib"/></g>
-    <g transform="translate(58,244)">${lead}</g>
+    <g transform="translate(54,92) rotate(-3)"><text class="goth fade" style="animation-delay:.2s">hey there, I'm</text></g>
+    <g transform="translate(52,164)" clip-path="url(#line1)">
+      <g class="rise" style="animation-delay:.35s"><text class="nameGlow" filter="url(#glow)">DEVAPRIYAN G S</text><text class="name">DEVAPRIYAN G S</text></g>
+    </g>
+    <g transform="translate(54,180)">
+      <path d="M0 8c80-12 170-15 260-6s110 6 170-6" fill="none" stroke="${C.blood}" stroke-width="6" stroke-linecap="round" class="scrib"/>
+      ${drips}
+    </g>
+    <g transform="translate(56,246)">${lead}</g>
 
-    <g transform="translate(56,280)"><g class="fade" style="animation-delay:1.3s"><g class="bob">
-      <rect width="246" height="52" rx="26" fill="${C.cream}"/>
-      <text x="26" y="31" class="btn">Explore my launches</text>
-      <circle cx="220" cy="26" r="18" fill="${C.gold}"/>
-      <path d="M212 26h15M222 20.5 227.5 26 222 31.5" stroke="${C.ink}" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    </g></g></g>
-
-    <g transform="translate(730,190)"><g class="pop">
-      <circle r="104" fill="${C.ink}" opacity=".45"/>
-      <circle r="96" fill="none" stroke="${C.gold}" stroke-width="1.5" stroke-dasharray="2 6" opacity=".7"/>
-      <g class="spin"><text class="seal"><textPath href="#ring" textLength="486" lengthAdjust="spacing">${seal}</textPath></text></g>
-      <circle r="60" fill="${C.royal}" stroke="url(#foil)" stroke-width="3"/>
-      <g class="crown">${crown(1.25)}</g>
+    <g transform="translate(56,300)"><g class="fade" style="animation-delay:1.3s">
+      <path d="M0 -4H28" stroke="${C.blood}" stroke-width="2"/>
+      <text x="40" y="0" class="aka">Devapriyan.G.S <tspan class="r">aka</tspan> Dedoo/Hebi</text>
+      <rect x="344" y="-12" width="8" height="15" fill="${C.bloodLt}" class="caret"/>
     </g></g>
 
-    ${flight("M-40 120 C 200 20, 380 200, 600 90 S 980 40, 940 220 S 500 400, 200 330 S -120 220, -40 120", 22, 0, `<g transform="scale(1.1)">${butterfly("#4f8dff", "#2f4fd8")}</g>`)}
-    ${flight("M960 300 C 780 360, 640 250, 520 330 S 250 380, 120 200 S 300 -20, 560 60 S 1000 140, 960 300", 26, -9, `<g transform="scale(.9)">${butterfly(C.gold, "#d9a520", 0.28)}</g>`)}
-    ${flight("M500 -30 C 420 80, 700 150, 820 110 S 900 -40, 700 -20 S 560 -60, 500 -30", 15, -4, `<g transform="scale(.75)">${butterfly(C.rose, C.crimson, 0.26)}</g>`)}
-    ${flight("M100 400 C 250 330, 330 380, 420 300 S 380 200, 300 240 S 20 440, 100 400", 19, -12, `<g transform="scale(.7)">${butterfly("#a78bfa", C.amethyst, 0.3)}</g>`)}
+    <g transform="translate(${cx},${cy})">
+      <g class="spinR"><circle r="${R + 34}" fill="none" stroke="${C.blood}" stroke-opacity=".3" stroke-dasharray="1 7"/></g>
+      <g class="spin">${orbit}</g>
+      <circle r="${R + 10}" fill="none" stroke="${C.ember}" stroke-width="6" filter="url(#haze)" class="ring"/>
+      <circle r="${R + 6}" fill="${C.void}" stroke="${C.blood}" stroke-width="2"/>
+      <g clip-path="url(#dp)">
+        <rect x="${-R}" y="${-R}" width="${2 * R}" height="${2 * R}" fill="${C.void}"/>
+        <g class="breathe">${snake("stippleSq", -R, -R, 2 * R, "url(#boneBlood)")}</g>
+        <rect x="${-R}" y="${R * 0.25}" width="${2 * R}" height="${R}" filter="url(#smokeB)" opacity=".6" class="driftA"/>
+      </g>
+      <circle r="${R}" fill="none" stroke="${C.bone}" stroke-opacity=".12"/>
+    </g>
   </g>
-  <rect x="1" y="1" width="${W - 2}" height="${H - 2}" rx="27" fill="none" stroke="${C.gold}" stroke-opacity=".35" stroke-width="2"/>
+  ${frameEdge(W, H)}
+  ${border(W, H)}
 </svg>`);
 }
 
 /* ------------------------------------------------------ section titles */
-// Edusphere-style heading: chunky display title, a handwritten aside and a drawn scribble.
-function title(file, heading, note, accent) {
-  const W = 900, H = 130;
+function title(file, heading, note) {
+  const W = 900, H = 120;
   write(file, `${svgOpen(W, H, heading)}
+  <defs>${COMMON_DEFS}${SMOKE_DEFS}${snakeMasks("viper")}<clipPath id="frame"><rect width="${W}" height="${H}" rx="18"/></clipPath></defs>
   <style>
-    ${fonts("display", "hand")}
-    .h{font:800 50px ${F.display};letter-spacing:-1px;fill:${C.ink};text-anchor:middle}
-    .n{font:700 25px ${F.hand};fill:${C.crimson};text-anchor:middle}
-    @media (prefers-color-scheme: dark){.h{fill:${C.cream}}.n{fill:${C.gold}}}
-    .up{opacity:0;animation:up 1s ${EASE_OUT} forwards}
-    @keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-    .scrib{stroke-dasharray:300;stroke-dashoffset:300;animation:draw 1.2s ${EASE_OUT} .7s forwards}
-    @keyframes draw{to{stroke-dashoffset:0}}
-    ${TWINKLE}
+    ${fonts("display", "goth")}
+    .h{font:900 38px ${F.display};letter-spacing:5px;fill:${C.bone};text-anchor:middle}
+    .n{font:400 22px ${F.goth};fill:${C.bloodLt};text-anchor:middle}
+    .bob{animation:bob 3.2s ease-in-out infinite}.bob2{animation:bob 3.2s ease-in-out -1.6s infinite}
+    @keyframes bob{50%{transform:translateY(-4px)}}
+    ${BASE_CSS}
   </style>
-  <text x="450" y="64" class="h up">${esc(heading)}</text>
-  <g transform="translate(450,104) rotate(-2)"><text class="n up" style="animation-delay:.35s">${esc(note)}</text></g>
-  <path d="M330 116c50-10 100-12 150-4s70 4 100-6" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" class="scrib"/>
-  ${sparkle(190, 44, 0.8, C.gold, 0)}${sparkle(716, 30, 0.6, C.lilacDk, 1)}
+  <g clip-path="url(#frame)">
+    <rect width="${W}" height="${H}" fill="${C.void}"/>
+    ${smokeLayers(W, H, 0.35)}
+  </g>
+  <text x="450" y="58" class="h up">${esc(heading)}</text>
+  <text x="450" y="94" class="n up" style="animation-delay:.3s">${esc(note)}</text>
+  <path d="M250 70H330M570 70H650" stroke="${C.blood}" stroke-width="1.5" class="scrib"/>
+  <g class="bob">${snake("viper", 92, 34, 52, "url(#bloodFade)")}${viperEyes(92, 34, 52)}</g>
+  <g class="bob2">${snake("viper", W - 144, 34, 52, "url(#bloodFade)")}${viperEyes(W - 144, 34, 52)}</g>
+  <rect width="${W}" height="${H}" filter="url(#grain)"/>
+  <rect x=".75" y=".75" width="${W - 1.5}" height="${H - 1.5}" rx="17" fill="none" stroke="${C.blood}" stroke-opacity=".35"/>
 </svg>`);
 }
-title("title-launches.svg", "Fresh launches", "every repo ships with a launch card, refreshed daily", C.gold);
-title("title-toolbox.svg", "The royal toolbox", "thirty-five tools, one very curious mind", C.crimson);
-title("title-activity.svg", "Activity, live", "hebi means snake, and this one eats my graph", C.amethyst);
+const toolCount = icons.groups.reduce((n, g) => n + g[1].length, 0);
+title("title-launches.svg", "FRESH STRIKES", "every repo strikes with its own card, refreshed daily");
+title("title-analytics.svg", "VENOM ANALYTICS", "every bite, counted");
+title("title-toolbox.svg", "THE ARSENAL", `${toolCount} fangs, one very curious mind`);
+title("title-activity.svg", "THE HUNT, LIVE", "hebi means snake, and this one eats my graph");
 
 /* ------------------------------------------------------------- neofetch */
-function neofetch(theme) {
-  const dark = theme === "dark";
-  const t = dark
-    ? { bg: C.ink, bg2: "#1d1238", border: C.gold, text: C.lilacLt, key: C.gold, value: C.lilacLt, dots: "#4b3d6b", add: "#5fd39a", del: C.rose, head: C.gold, rule: "#3a2d5c" }
-    : { bg: C.cream, bg2: C.paper, border: C.goldDk, text: C.ink, key: C.crimson, value: C.royal, dots: "#d4c4a6", add: C.emerald, del: C.crimson, head: C.royal, rule: "#e3d5bb" };
-  const PX = 28, PY = 44;
-  const { cols, cw, ch } = portrait;
-  const art = portrait.dark // the dark render reads best; light theme frames it as a dark "screen"
-    .map((runs, y) => {
-      const spans = runs.map(([s, col]) => (col ? `<tspan fill="${col}">${esc(s)}</tspan>` : esc(s))).join("");
-      return `<text x="${PX}" y="${PY + y * ch}" textLength="${cols * cw}" lengthAdjust="spacingAndGlyphs" class="px" style="animation-delay:${(y * 0.022).toFixed(3)}s">${spans}</text>`;
-    })
-    .join("");
-  const artH = portrait.rows * ch;
-
-  const WIDTH = 52;
-  const topLangs = (() => {
-    const bytes = {};
-    for (const r of repos) for (const e of r.languages.edges) bytes[e.node.name] = (bytes[e.node.name] ?? 0) + e.size;
-    return Object.entries(bytes).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([n]) => n).join(", ") || "—";
-  })();
+{
+  const W = 900, PX = 28, PY = 44, X = 352, LH = 20.5, WIDTH = 56;
+  const topLangs = langBytes.slice(0, 4).map(([n]) => n).join(", ") || "—";
   const last = launches[0] ?? repos[0];
   const kv = (key, value, valueSegs) => {
     const k = key.split(".");
@@ -325,7 +464,7 @@ function neofetch(theme) {
     blank,
     rule("Latest Launch"),
     kv("Repo", last?.name ?? "—"),
-    kv("Message", (last?.defaultBranchRef?.target.messageHeadline ?? "—").slice(0, 30)),
+    kv("Message", (last?.defaultBranchRef?.target.messageHeadline ?? "—").slice(0, 34)),
     kv("When", last ? ago(last.pushedAt) : "—"),
     blank,
     rule("GitHub Stats"),
@@ -334,69 +473,238 @@ function neofetch(theme) {
     kv("Contributions", `${fmt(allTimeContributions)} all-time`),
     kv("Lines of Code", locLine, [[fmt(loc.add - loc.del), "v"], [" ( ", ""], [`+${fmt(loc.add)}`, "a"], [", ", ""], [`-${fmt(loc.del)}`, "x"], [" )", ""]]),
   ];
-  const X = 500, LH = 20.5;
   const info = rows
     .map((segs, i) => `<text x="${X}" y="${PY + i * LH}" class="row" style="animation-delay:${(0.5 + i * 0.06).toFixed(2)}s">${segs.map(([s, cls]) => `<tspan${cls ? ` class="${cls}"` : ""}>${esc(s)}</tspan>`).join("")}</text>`)
     .join("");
   const endY = PY + rows.length * LH;
-  const jewels = [C.crimson, C.rose, C.gold, C.goldLt, C.emerald, C.sapphire, C.amethyst, C.lilac]
-    .map((col, i) => `<g transform="translate(${X + 4 + i * 30},${endY + 2})"><rect width="24" height="14" rx="4" fill="${col}" class="gem" style="animation-delay:${(i * 0.12).toFixed(2)}s"/></g>`)
+  const swatches = [C.void, C.ash, C.mute, C.boneDk, C.bone, C.bloodDk, C.blood, C.ember]
+    .map((col, i) => `<g transform="translate(${X + 4 + i * 30},${endY + 2})"><rect width="24" height="14" rx="2" fill="${col}" stroke="${C.smoke}" class="gem" style="animation-delay:${(i * 0.12).toFixed(2)}s"/></g>`)
     .join("");
-  const W = 1000, H = Math.max(endY + 46, PY + artH + 24);
+  const H = endY + 46;
+  const panel = { x: PX - 8, y: 22, w: 308, h: H - 44 };
+  const sh = panel.h - 20, sw = (sh * IMG.stipple[1]) / IMG.stipple[2];
+  const sx = panel.x + (panel.w - sw) / 2, sy = panel.y + 10;
 
-  return `${svgOpen(W, H, `${USER} — neofetch with live GitHub stats`)}
+  write("neofetch.svg", `${svgOpen(W, H, `${USER} — neofetch with live GitHub stats`)}
   <defs>
-    <linearGradient id="scan" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.gold}" stop-opacity="0"/><stop offset=".5" stop-color="${C.goldLt}" stop-opacity="${dark ? 0.28 : 0.4}"/><stop offset="1" stop-color="${C.gold}" stop-opacity="0"/></linearGradient>
-    <clipPath id="artClip"><rect x="${PX - 8}" y="${PY - 14}" width="${cols * cw + 16}" height="${artH + 12}" rx="14"/></clipPath>
+    ${COMMON_DEFS}${SMOKE_DEFS}${snakeMasks("stipple")}
+    <linearGradient id="scan" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.ember}" stop-opacity="0"/><stop offset=".5" stop-color="${C.ember}" stop-opacity=".35"/><stop offset="1" stop-color="${C.ember}" stop-opacity="0"/></linearGradient>
+    <radialGradient id="pool" cx=".5" cy=".62" r=".6"><stop offset="0" stop-color="${C.blood}" stop-opacity=".35"/><stop offset="1" stop-color="${C.blood}" stop-opacity="0"/></radialGradient>
+    <clipPath id="artClip"><rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" rx="14"/></clipPath>
+    <clipPath id="frame"><rect width="${W}" height="${H}" rx="22"/></clipPath>
   </defs>
   <style>
-    ${fonts("mono", "monoBold", "hand")}
+    ${fonts("mono", "monoBold", "goth")}
     text,tspan{white-space:pre}
-    .row,.row tspan{font:400 14px ${F.mono};fill:${t.text}}
-    .k{fill:${t.key}!important} .v{fill:${t.value}!important} .d{fill:${t.dots}!important} .r{fill:${t.rule}!important}
-    .a{fill:${t.add}!important} .x{fill:${t.del}!important} .h{fill:${t.head}!important;font-weight:500!important}
-    .px{font:500 ${(cw / 0.6).toFixed(2)}px ${F.mono};fill:${C.lilacLt};opacity:0;animation:print .5s ${EASE_OUT} forwards}
-    @keyframes print{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+    .row,.row tspan{font:400 14px ${F.mono};fill:${C.bone}}
+    .k{fill:${C.bloodLt}!important} .v{fill:${C.bone}!important} .d{fill:#3a3a40!important} .r{fill:#3a1018!important}
+    .a{fill:#d8d2cd!important} .x{fill:${C.ember}!important} .h{fill:${C.ember}!important;font-weight:500!important}
     .row{opacity:0;animation:slide .6s ${EASE_OUT} forwards}
     @keyframes slide{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
     .scan{animation:scan 5s ${EASE_OUT} 1.4s infinite}
-    @keyframes scan{from{transform:translateY(-60px)}to{transform:translateY(${artH + 60}px)}}
+    @keyframes scan{from{transform:translateY(-60px)}to{transform:translateY(${panel.h + 60}px)}}
     .gem{transform-box:fill-box;transform-origin:center bottom;animation:gem 2.6s ${EASE_POP} infinite}
     @keyframes gem{0%,60%,100%{transform:none}30%{transform:translateY(-5px) scaleY(1.1)}}
-    .cur{fill:${t.head};animation:blink 1s steps(1) infinite}
+    .cur{fill:${C.ember};animation:blink 1s steps(1) infinite}
     @keyframes blink{50%{opacity:0}}
-    .stamp{font:700 17px ${F.hand};fill:${t.dots}}
-    ${FLAP}
+    .stamp{font:400 17px ${F.goth};fill:${C.mute}}
+    .breathe{transform-box:fill-box;transform-origin:center;animation:breathe 6s ease-in-out infinite}
+    @keyframes breathe{50%{transform:scale(1.025) translateY(-3px)}}
+    .reveal{animation:reveal 2.4s ${EASE_OUT} both}
+    @keyframes reveal{from{opacity:0;filter:blur(8px)}to{opacity:1;filter:blur(0)}}
+    ${BASE_CSS} ${EMBER_CSS(panel.h)}
   </style>
-  <rect x="1" y="1" width="${W - 2}" height="${H - 2}" rx="28" fill="${t.bg}" stroke="${t.border}" stroke-opacity=".5" stroke-width="2"/>
-  <rect x="${PX - 8}" y="${PY - 14}" width="${cols * cw + 16}" height="${artH + 12}" rx="14" fill="${C.ink}"/>
-  <g clip-path="url(#artClip)">
-    ${art}
-    <rect class="scan" x="${PX - 8}" y="${PY - 40}" width="${cols * cw + 16}" height="46" fill="url(#scan)"/>
+  <g clip-path="url(#frame)">
+    <rect width="${W}" height="${H}" fill="${C.ink}"/>
+    ${smokeLayers(W, H, 0.22)}
   </g>
-  <rect x="${PX - 8}" y="${PY - 14}" width="${cols * cw + 16}" height="${artH + 12}" rx="14" fill="none" stroke="${t.border}" stroke-opacity=".35"/>
-  ${flight(`M${PX + 440} ${PY + 30} C ${PX + 480} ${PY - 20}, ${PX + 380} ${PY - 40}, ${PX + 340} ${PY - 6} S ${PX + 420} ${PY + 80}, ${PX + 440} ${PY + 30}`, 9, 0, `<g transform="scale(.6)">${butterfly("#4f8dff", C.sapphire, 0.25)}</g>`)}
-  ${flight(`M${PX - 10} ${PY + artH - 30} C ${PX + 40} ${PY + artH + 20}, ${PX + 120} ${PY + artH - 10}, ${PX + 60} ${PY + artH - 60} S ${PX - 40} ${PY + artH - 80}, ${PX - 10} ${PY + artH - 30}`, 11, -3, `<g transform="scale(.5)">${butterfly(C.gold, "#d9a520", 0.28)}</g>`)}
+  <rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" rx="14" fill="${C.void}"/>
+  <g clip-path="url(#artClip)">
+    <rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" fill="url(#pool)"/>
+    <g class="reveal"><g class="breathe">${snake("stipple", sx, sy, sw, "url(#boneBlood)")}</g></g>
+    <g transform="translate(0,${panel.y + panel.h * 0.35})">${smokeLayers(panel.w + panel.x, panel.h * 0.7, 0.6)}</g>
+    <g transform="translate(${panel.x},${panel.y})">${embers(10, panel.w, panel.h, 21)}</g>
+    <rect class="scan" x="${panel.x}" y="${panel.y - 30}" width="${panel.w}" height="40" fill="url(#scan)"/>
+  </g>
+  <rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" rx="14" fill="none" stroke="${C.blood}" stroke-opacity=".5"/>
   ${info}
-  ${jewels}
+  ${swatches}
   <rect x="${X + 8 * 30 + 8}" y="${endY + 1}" width="9" height="16" rx="1" class="cur"/>
   <text x="${W - 30}" y="${H - 16}" class="stamp" text-anchor="end">live · refreshed ${today}</text>
-</svg>`;
+  ${frameEdge(W, H)}
+  ${border(W, H)}
+</svg>`);
 }
-write("neofetch-dark.svg", neofetch("dark"));
-write("neofetch-light.svg", neofetch("light"));
+
+/* ------------------------------------------------------------- analytics */
+{
+  const W = 900, L = 40, R = W - 40, IW = R - L;
+  const head = (x, y, label, aside = "") => `<g transform="translate(${x},${y})"><rect y="-10" width="3" height="13" fill="${C.ember}"/><text x="12" y="1.5" class="sh">${esc(label)}</text>${aside ? `<text x="${12 + label.length * 10.3 + 12}" y="1.5" class="sa">${esc(aside)}</text>` : ""}</g>`;
+
+  // KPI tiles
+  const kpis = [
+    ["ALL-TIME", fmt(allTimeContributions), "contributions"],
+    ["LAST 365 DAYS", fmt(lastYearTotal), `${activeDays} active days`],
+    ["CURRENT STREAK", plural(streaks.current, "day"), streaks.current ? "still biting" : "lying in wait"],
+    ["LONGEST STREAK", plural(streaks.longest, "day"), streaks.longestEnd ? `ended ${shortDate(streaks.longestEnd)}` : "—"],
+    ["BEST DAY", fmt(bestDay[1]), bestDay[0] ? shortDate(bestDay[0]) : "—"],
+    ["COMMITS", fmt(repos.reduce((n, r) => n + commitsOf(r), 0)), "on default branches"],
+    ["PUBLIC REPOS", fmt(repos.length), `${fmt(stars)} stars · ${fmt(user.followers.totalCount)} followers`],
+    ["NET LINES", fmt(loc.add - loc.del), `+${fmt(loc.add)} / -${fmt(loc.del)}`],
+  ];
+  const TW = (IW - 3 * 14) / 4, TH = 90;
+  const tiles = kpis.map(([label, v, sub], i) => {
+    const x = L + (i % 4) * (TW + 14), y = 34 + Math.floor(i / 4) * (TH + 14);
+    return `<g transform="translate(${n1(x)},${y})"><g class="up" style="animation-delay:${(0.1 + i * 0.07).toFixed(2)}s">
+      <rect width="${n1(TW)}" height="${TH}" rx="10" fill="${C.ink2}" stroke="${C.ash}"/>
+      <rect y="14" width="3" height="${TH - 28}" fill="${C.blood}"/>
+      <text x="18" y="26" class="tl">${label}</text>
+      <text x="18" y="60" class="tv">${esc(v)}</text>
+      <text x="18" y="78" class="ts">${esc(sub)}</text>
+    </g></g>`;
+  }).join("");
+
+  // Heatmap, last 365 days
+  const HY = 270, CELL = 11, GAP = 3, GX = L + 34;
+  const nonZero = lastYear.map((d) => d.contributionCount).filter(Boolean).sort((a, b) => a - b);
+  const q = (p) => nonZero[Math.min(nonZero.length - 1, Math.floor(p * nonZero.length))] ?? 1;
+  const cuts = [q(0.25), q(0.5), q(0.75)];
+  const level = (c) => (c === 0 ? 0 : c <= cuts[0] ? 1 : c <= cuts[1] ? 2 : c <= cuts[2] ? 3 : 4);
+  let cells = "", months = "", lastMonth = "";
+  calWeeks.forEach((week, wi) => {
+    for (const d of week) {
+      const wd = new Date(d.date + "T00:00:00Z").getUTCDay();
+      const x = GX + wi * (CELL + GAP), y = HY + 22 + wd * (CELL + GAP);
+      const isToday = d.date === todayISO;
+      cells += `<rect x="${x}" y="${y}" width="${CELL}" height="${CELL}" rx="2.5" fill="${HEAT[level(d.contributionCount)]}" class="cell" style="animation-delay:${((wi + wd) * 0.018).toFixed(3)}s"/>`;
+      if (isToday) cells += `<rect x="${x}" y="${y}" width="${CELL}" height="${CELL}" rx="2.5" fill="none" stroke="${C.ember}" class="pulse"/>`;
+    }
+    const m = new Date((week[0]?.date ?? todayISO) + "T00:00:00Z").toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" });
+    if (m !== lastMonth && wi < calWeeks.length - 2) { months += `<text x="${GX + wi * (CELL + GAP)}" y="${HY + 14}" class="ax">${m}</text>`; lastMonth = m; }
+  });
+  const wdLabels = [[1, "Mon"], [3, "Wed"], [5, "Fri"]].map(([i, l]) => `<text x="${L}" y="${HY + 22 + i * (CELL + GAP) + 9}" class="ax">${l}</text>`).join("");
+  const legendX = GX + calWeeks.length * (CELL + GAP) - 5 * (CELL + GAP) - 70;
+  const heatLegend = `<g transform="translate(${legendX},${HY + 22 + 7 * (CELL + GAP) + 10})"><text x="0" y="9" class="ax">less</text>${HEAT.map((c, i) => `<rect x="${32 + i * (CELL + GAP)}" width="${CELL}" height="${CELL}" rx="2.5" fill="${c}"/>`).join("")}<text x="${32 + 5 * (CELL + GAP) + 4}" y="9" class="ax">more</text></g>`;
+
+  // Weekday rhythm (last 365 days, Monday first)
+  const CY = 470, CH = 120;
+  const wdTotals = [0, 0, 0, 0, 0, 0, 0];
+  for (const d of lastYear) wdTotals[(new Date(d.date + "T00:00:00Z").getUTCDay() + 6) % 7] += d.contributionCount;
+  const wdMax = Math.max(1, ...wdTotals);
+  const wdTop = wdTotals.indexOf(Math.max(...wdTotals));
+  const BW = 34, BG = (380 - 7 * BW) / 6;
+  const wdBars = wdTotals.map((v, i) => {
+    const h = Math.max(3, (v / wdMax) * CH), x = L + i * (BW + BG), y = CY + 30 + CH - h;
+    return `<rect x="${n1(x)}" y="${n1(y)}" width="${BW}" height="${n1(h)}" rx="4" fill="${i === wdTop ? C.ember : C.blood}" fill-opacity="${i === wdTop ? 1 : 0.75}" class="bar" style="animation-delay:${(0.3 + i * 0.07).toFixed(2)}s"/>
+      <text x="${n1(x + BW / 2)}" y="${n1(y - 6)}" class="bv" text-anchor="middle">${fmt(v)}</text>
+      <text x="${n1(x + BW / 2)}" y="${CY + 30 + CH + 16}" class="ax" text-anchor="middle">${"MTWTFSS"[i]}</text>`;
+  }).join("");
+
+  // Language venom: stacked bar + ranked list
+  const LX = 480, LWID = R - LX;
+  const totalBytes = langBytes.reduce((n, [, b]) => n + b, 0) || 1;
+  const langs = langBytes.slice(0, 5);
+  const otherBytes = langBytes.slice(5).reduce((n, [, b]) => n + b, 0);
+  if (otherBytes) langs.push(["Other", otherBytes]);
+  let bx = 0;
+  const langBar = langs.map(([, b], i) => {
+    const w = (b / totalBytes) * LWID;
+    const el = `<rect x="${n1(LX + bx)}" y="${CY + 22}" width="${n1(Math.max(0, w - 2))}" height="12" rx="3" fill="${RAMP[i]}" class="grow" style="animation-delay:${(0.4 + i * 0.1).toFixed(2)}s"/>`;
+    bx += w;
+    return el;
+  }).join("");
+  const langList = langs.map(([name, b], i) => {
+    const y = CY + 60 + i * 20;
+    const pct = ((b / totalBytes) * 100).toFixed(1);
+    return `<g class="up" style="animation-delay:${(0.5 + i * 0.07).toFixed(2)}s"><rect x="${LX}" y="${y - 9}" width="10" height="10" rx="2" fill="${RAMP[i]}"/><text x="${LX + 18}" y="${y}" class="ll">${esc(name)}</text>
+      <path d="M${LX + 18 + name.length * 7.6 + 8} ${y - 3}H${R - 52}" stroke="${C.ash}" stroke-dasharray="2 4"/><text x="${R}" y="${y}" class="lv" text-anchor="end">${pct}%</text></g>`;
+  }).join("");
+
+  // Monthly strikes, last 12 months
+  const MY = 700, MH = 120, MX = L, MW = 440;
+  const monthKeys = [];
+  { const [ty, tm] = todayISO.split("-").map(Number); for (let k = 11; k >= 0; k--) { const d = new Date(Date.UTC(ty, tm - 1 - k, 1)); monthKeys.push(d.toISOString().slice(0, 7)); } }
+  const monthTotals = monthKeys.map((k) => allDays.filter(([d]) => d.startsWith(k)).reduce((n, [, c]) => n + c, 0));
+  const mMax = Math.max(1, ...monthTotals);
+  const pts = monthTotals.map((v, i) => [MX + (i / 11) * MW, MY + 30 + MH - (v / mMax) * MH]);
+  const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${n1(x)} ${n1(y)}`).join("");
+  const area = `${line}L${MX + MW} ${MY + 30 + MH}L${MX} ${MY + 30 + MH}Z`;
+  const peak = monthTotals.indexOf(Math.max(...monthTotals));
+  const grid = [0, 0.5, 1].map((f) => `<path d="M${MX} ${n1(MY + 30 + MH - f * MH)}H${MX + MW}" stroke="${C.ash}" stroke-dasharray="${f ? "2 5" : "0"}"/><text x="${MX + MW + 8}" y="${n1(MY + 34 + MH - f * MH)}" class="ax">${fmt(Math.round(f * mMax))}</text>`).join("");
+  const mLabels = monthKeys.map((k, i) => (i % 2 === 1 || i === 11) ? `<text x="${n1(pts[i][0])}" y="${MY + 30 + MH + 18}" class="ax" text-anchor="middle">${new Date(k + "-01T00:00:00Z").toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" })}</text>` : "").join("");
+  const markers = pts.map(([x, y], i) => `<circle cx="${n1(x)}" cy="${n1(y)}" r="${i === peak || i === 11 ? 4.5 : 3}" fill="${i === peak ? C.ember : C.void}" stroke="${C.ember}" stroke-width="2" class="up" style="animation-delay:${(1 + i * 0.05).toFixed(2)}s"/>`).join("");
+  const callouts = [...new Set([peak, 11])].map((i) => `<text x="${n1(Math.min(pts[i][0], MX + MW - 4))}" y="${n1(pts[i][1] - 12)}" class="bv" text-anchor="${i === 11 ? "end" : "middle"}">${fmt(monthTotals[i])}</text>`).join("");
+
+  // Commits by repo
+  const RX = 560, RWID = R - RX;
+  const byRepo = [...repos].sort((a, b) => commitsOf(b) - commitsOf(a)).slice(0, 6);
+  const rMax = Math.max(1, ...byRepo.map(commitsOf));
+  const repoBars = byRepo.map((r, i) => {
+    const y = MY + 30 + i * 24, w = Math.max(4, (commitsOf(r) / rMax) * (RWID - 150));
+    return `<text x="${RX}" y="${y + 10}" class="ll">${esc(r.name.length > 16 ? r.name.slice(0, 15) + "…" : r.name)}</text>
+      <rect x="${RX + 124}" y="${y}" width="${n1(w)}" height="12" rx="3" fill="${i ? C.blood : C.ember}" fill-opacity="${i ? 0.8 : 1}" class="grow" style="animation-delay:${(0.5 + i * 0.08).toFixed(2)}s"/>
+      <text x="${n1(RX + 130 + w)}" y="${y + 10}" class="bv">${fmt(commitsOf(r))}</text>`;
+  }).join("");
+
+  const H = MY + 30 + MH + 50;
+  write("analytics.svg", `${svgOpen(W, H, `Analytics: ${fmt(allTimeContributions)} contributions all-time, ${fmt(lastYearTotal)} in the last year, current streak ${streaks.current} days, longest ${streaks.longest} days`)}
+  <defs>
+    ${COMMON_DEFS}${SMOKE_DEFS}
+    <linearGradient id="areaG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.ember}" stop-opacity=".45"/><stop offset="1" stop-color="${C.blood}" stop-opacity="0"/></linearGradient>
+    <clipPath id="frame"><rect width="${W}" height="${H}" rx="22"/></clipPath>
+  </defs>
+  <style>
+    ${fonts("display", "mono", "monoBold", "goth")}
+    .tl{font:500 10.5px ${F.mono};letter-spacing:2px;fill:${C.boneDk}}
+    .tv{font:900 27px ${F.display};fill:${C.bone}}
+    .ts{font:400 11px ${F.mono};fill:${C.mute}}
+    .sh{font:500 13px ${F.mono};letter-spacing:2.5px;fill:${C.bone}}
+    .sa{font:400 17px ${F.goth};fill:${C.bloodLt}}
+    .ax{font:400 10.5px ${F.mono};fill:${C.mute}}
+    .bv{font:500 11px ${F.mono};fill:${C.bone}}
+    .ll{font:400 12.5px ${F.mono};fill:${C.bone}}
+    .lv{font:500 12.5px ${F.mono};fill:${C.boneDk}}
+    .cell{transform-box:fill-box;transform-origin:center;animation:cell .6s ${EASE_POP} both}
+    @keyframes cell{from{transform:scale(0);opacity:0}}
+    .bar{transform-box:fill-box;transform-origin:bottom;animation:bar 1s ${EASE_OUT} both}
+    @keyframes bar{from{transform:scaleY(0)}}
+    .grow{transform-box:fill-box;transform-origin:left;animation:grow 1.2s ${EASE_OUT} both}
+    @keyframes grow{from{transform:scaleX(0)}}
+    .line{stroke-dasharray:1400;stroke-dashoffset:1400;animation:draw 2.2s ${EASE_OUT} .6s forwards}
+    .areaF{opacity:0;animation:fadeIn 1.4s ease 1.2s forwards}@keyframes fadeIn{to{opacity:1}}
+    ${BASE_CSS}
+  </style>
+  <g clip-path="url(#frame)">
+    <rect width="${W}" height="${H}" fill="${C.ink}"/>
+    ${smokeLayers(W, H, 0.18)}
+  </g>
+  ${tiles}
+  ${head(L, HY, "LAST 365 DAYS", `${fmt(lastYearTotal)} contributions`)}
+  ${months}${wdLabels}${cells}${heatLegend}
+  ${head(L, CY, "WEEKDAY RHYTHM", `${["Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays", "Sundays"][wdTop]} bite hardest`)}
+  <path d="M${L} ${CY + 30 + CH}H${L + 380}" stroke="${C.ash}"/>
+  ${wdBars}
+  ${head(LX, CY, "LANGUAGE VENOM")}
+  ${langBar}${langList}
+  ${head(MX, MY, "MONTHLY STRIKES", "last 12 months")}
+  ${grid}
+  <path d="${area}" fill="url(#areaG)" class="areaF"/>
+  <path d="${line}" fill="none" stroke="${C.ember}" stroke-width="2" stroke-linejoin="round" class="line"/>
+  ${markers}${callouts}${mLabels}
+  ${head(RX, MY, "COMMITS BY REPO")}
+  ${repoBars}
+  ${frameEdge(W, H)}
+  ${border(W, H)}
+</svg>`);
+}
 
 /* ------------------------------------------------------- launch cards */
-const CRESTS = [[C.royal, C.amethyst], [C.sapphire, "#5b7cff"], [C.crimson, "#e0587a"], [C.emerald, "#35a57a"]];
-const PILLS = [C.lilac, C.mint, C.goldLt, C.rose, C.lilacLt];
-
 function launchCard(r, i) {
   const o = config.launches.overrides[r.name] ?? {};
-  const [c1, c2] = CRESTS[i % CRESTS.length];
   const W = 900, H = 320;
   const tagline = wrap(o.tagline ?? r.description ?? "Something new is shipping.", 58).slice(0, 2);
   const tags = [...(o.tags ?? []), ...r.repositoryTopics.nodes.map((t) => t.topic.name)].slice(0, 4);
-  const commits = r.defaultBranchRef?.target.history.totalCount ?? 0;
+  const commits = commitsOf(r);
   const monogram = (r.name.match(/[A-Z]|(?<=^|[-_ ])[a-z]/g) ?? [r.name[0]]).slice(0, 2).join("").toUpperCase();
   const launched = new Date(r.createdAt).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
   const all = r.languages.edges.reduce((n, e) => n + e.size, 0) || 1;
@@ -406,73 +714,71 @@ function launchCard(r, i) {
   let x = 0;
   const bar = langs.map((e, k) => {
     const w = (e.size / total) * 260;
-    const seg = `<rect x="${x.toFixed(1)}" width="${Math.max(0, w - 3).toFixed(1)}" height="10" rx="5" fill="${e.node.color ?? C.lilacDk}" class="grow" style="animation-delay:${(0.9 + k * 0.12).toFixed(2)}s"/>`;
+    const seg = `<rect x="${x.toFixed(1)}" width="${Math.max(0, w - 2).toFixed(1)}" height="10" rx="3" fill="${RAMP[k % RAMP.length]}" class="grow" style="animation-delay:${(0.9 + k * 0.12).toFixed(2)}s"/>`;
     x += w;
     return seg;
   }).join("");
   let lx = 0;
-  const legend = langs.slice(0, 3).map((e) => {
+  const legend = langs.slice(0, 3).map((e, k) => {
     const label = `${e.node.name} ${((e.size / total) * 100).toFixed(0)}%`;
-    const el = `<circle cx="${lx + 5}" cy="28" r="4.5" fill="${e.node.color ?? C.lilacDk}"/><text x="${lx + 15}" y="32.5" class="s">${esc(label)}</text>`;
-    lx += label.length * 6.6 + 30;
+    const el = `<rect x="${lx}" y="23" width="9" height="9" rx="2" fill="${RAMP[k]}"/><text x="${lx + 15}" y="32" class="s">${esc(label)}</text>`;
+    lx += label.length * 6.9 + 28;
     return el;
   }).join("");
 
   let tx = 0;
   const tagEls = tags.map((tag, k) => {
     const w = tag.length * 7.6 + 30;
-    const el = `<g transform="translate(${tx + w / 2},13)"><g class="pop" style="animation-delay:${(0.7 + k * 0.08).toFixed(2)}s"><rect x="${-w / 2}" y="-13" width="${w}" height="26" rx="13" fill="${PILLS[(k + i) % PILLS.length]}" stroke="${C.ink}" stroke-width="1.5"/><text y="4.5" class="tag" text-anchor="middle">${esc(tag)}</text></g></g>`;
+    const el = `<g transform="translate(${tx + w / 2},13)"><g class="pop" style="animation-delay:${(0.7 + k * 0.08).toFixed(2)}s"><rect x="${-w / 2}" y="-13" width="${w}" height="26" rx="4" fill="${C.wine}" stroke="${C.blood}" stroke-opacity=".8"/><text y="4.5" class="tag" text-anchor="middle">${esc(tag)}</text></g></g>`;
     tx += w + 8;
     return el;
   }).join("");
 
-  const stats = [["★", fmt(r.stargazerCount), "stars"], ["⑂", fmt(r.forkCount), "forks"], ["◆", fmt(commits), "commits"], ["↑", ago(r.pushedAt).replace(" ago", ""), "since last ship"]];
+  const stats = [["★", fmt(r.stargazerCount), "stars"], ["⑂", fmt(r.forkCount), "forks"], ["◆", fmt(commits), "commits"], ["↑", ago(r.pushedAt).replace(" ago", ""), "since last strike"]];
   let sx = 0;
   const statEls = stats.map(([icon, v, label], k) => {
     const text = `${v} ${label}`;
     const w = text.length * 7.3 + 44;
-    const el = `<g transform="translate(${sx},0)"><g class="up" style="animation-delay:${(0.8 + k * 0.07).toFixed(2)}s"><rect width="${w}" height="32" rx="16" fill="${C.cream}" stroke="${C.ink}" stroke-opacity=".18"/><circle cx="16" cy="16" r="10" fill="${C.ink}"/><text x="16" y="20" class="si" text-anchor="middle">${icon}</text><text x="32" y="21" class="sv"><tspan class="svb">${esc(v)}</tspan> ${label}</text></g></g>`;
+    const el = `<g transform="translate(${sx},0)"><g class="up" style="animation-delay:${(0.8 + k * 0.07).toFixed(2)}s"><rect width="${w}" height="32" rx="6" fill="${C.ink2}" stroke="${C.smoke}"/><circle cx="16" cy="16" r="10" fill="${C.bloodDk}"/><text x="16" y="20" class="si" text-anchor="middle">${icon}</text><text x="32" y="21" class="sv"><tspan class="svb">${esc(v)}</tspan> ${label}</text></g></g>`;
     sx += w + 8;
     return el;
   }).join("");
 
-  const scallop = Array.from({ length: 24 }, (_, k) => {
-    const a = (k / 24) * Math.PI * 2, a2 = ((k + 0.5) / 24) * Math.PI * 2;
-    return `${k ? "L" : "M"}${(Math.cos(a) * 50).toFixed(1)} ${(Math.sin(a) * 50).toFixed(1)} L${(Math.cos(a2) * 44).toFixed(1)} ${(Math.sin(a2) * 44).toFixed(1)}`;
-  }).join(" ") + "Z";
+  // A ring of fangs around the star count.
+  const fangs = Array.from({ length: 18 }, (_, k) => {
+    const a = (k / 18) * Math.PI * 2, a1 = a - 0.11, a2 = a + 0.11;
+    const p = (ang, rr) => `${(Math.cos(ang) * rr).toFixed(1)} ${(Math.sin(ang) * rr).toFixed(1)}`;
+    return `M${p(a1, 50)} L${p(a, 38)} L${p(a2, 50)}Z`;
+  }).join("");
 
   return `${svgOpen(W, H, `${r.name} — launch card`)}
   <defs>
-    <linearGradient id="crest" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>
-    <linearGradient id="foil" x1="0" x2="1"><stop offset="0" stop-color="${C.goldDk}"/><stop offset=".45" stop-color="${C.goldLt}"/><stop offset=".55" stop-color="${C.gold}"/><stop offset="1" stop-color="${C.goldDk}"/>
-      <animateTransform attributeName="gradientTransform" type="translate" values="-1 0;1 0" dur="3.5s" repeatCount="indefinite"/></linearGradient>
-    <clipPath id="card"><rect x="6" y="6" width="${W - 12}" height="${H - 12}" rx="28"/></clipPath>
-    <clipPath id="crestClip"><rect width="112" height="112" rx="26"/></clipPath>
+    ${COMMON_DEFS}${SMOKE_DEFS}${snakeMasks("viper", "stipple")}
+    <linearGradient id="crest" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${C.bloodLt}"/><stop offset="1" stop-color="${C.wine}"/></linearGradient>
+    <clipPath id="card"><rect width="${W}" height="${H}" rx="22"/></clipPath>
+    <clipPath id="crestClip"><rect width="112" height="112" rx="14"/></clipPath>
   </defs>
   <style>
-    ${fonts("display", "hand", "body", "bodyBold")}
-    text{font-family:${F.body};fill:${C.ink}}
-    .name{font:800 46px ${F.display};letter-spacing:-1px}
-    .tl{font-size:17px;fill:#4a3f5c}
-    .hand{font:700 26px ${F.hand};fill:${C.crimson}}
-    .tag{font:700 12.5px ${F.body}}
-    .s{font-size:12.5px;fill:#6b5f80}
-    .sv{font-size:13px;fill:#4a3f5c} .svb{font-weight:700;fill:${C.ink}}
-    .si{font-size:11px;font-weight:700;fill:${C.gold}}
-    .mono{font:800 46px ${F.display};fill:url(#foil)}
-    .seal{font:800 26px ${F.display};fill:${C.cream}}
-    .sealL{font:700 10px ${F.body};letter-spacing:2px;fill:${C.goldLt}}
-    .live{font:800 13px ${F.display};letter-spacing:1.5px;fill:${C.ink}}
-    .btn{font:700 14px ${F.body};fill:${C.cream}}
-    .up{opacity:0;animation:up .8s ${EASE_OUT} forwards}
-    @keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+    ${fonts("display", "goth", "body", "bodyBold", "mono")}
+    text{font-family:${F.body};fill:${C.bone}}
+    .name{font:900 40px ${F.display};letter-spacing:1px;fill:${C.bone}}
+    .tl{font-size:16.5px;fill:${C.boneDk}}
+    .goth{font:400 25px ${F.goth};fill:${C.bloodLt}}
+    .tag{font:700 12.5px ${F.body};fill:${C.bone}}
+    .s{font:400 11.5px ${F.mono};fill:${C.boneDk}}
+    .sv{font-size:13px;fill:${C.boneDk}} .svb{font-weight:700;fill:${C.bone}}
+    .si{font-size:11px;font-weight:700;fill:${C.bone}}
+    .mono{font:900 44px ${F.display};fill:${C.bone}}
+    .seal{font:900 24px ${F.display};fill:${C.bone}}
+    .sealL{font:500 9.5px ${F.mono};letter-spacing:2px;fill:${C.ember}}
+    .live{font:500 12px ${F.mono};letter-spacing:2px;fill:${C.bone}}
     .pop{animation:pop .8s ${EASE_POP} both}
     @keyframes pop{from{transform:scale(0) rotate(-12deg)}}
     .tilt{animation:tilt 5s ease-in-out infinite}
-    @keyframes tilt{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(-2deg) translateY(-4px)}}
+    @keyframes tilt{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(-1deg) translateY(-4px)}}
     .sticker{animation:sticker 2.8s ${EASE_POP} infinite}
-    @keyframes sticker{0%,70%,100%{transform:rotate(8deg) scale(1)}80%{transform:rotate(3deg) scale(1.08)}}
-    .spin{animation:spin 18s linear infinite}
+    @keyframes sticker{0%,70%,100%{transform:rotate(4deg) scale(1)}80%{transform:rotate(1deg) scale(1.08)}}
+    .spin{animation:spin 22s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .bounce{animation:bounce 1.6s ${EASE_POP} infinite}
     @keyframes bounce{0%,60%,100%{transform:none}30%{transform:translateY(-6px)}}
@@ -480,66 +786,61 @@ function launchCard(r, i) {
     @keyframes shine{0%,50%{transform:translateX(-160px) skewX(-20deg)}100%{transform:translateX(200px) skewX(-20deg)}}
     .grow{transform-box:fill-box;transform-origin:left;animation:grow 1.2s ${EASE_OUT} both}
     @keyframes grow{from{transform:scaleX(0)}}
-    .scrib{stroke-dasharray:420;stroke-dashoffset:420;animation:draw 1.1s ${EASE_OUT} .6s forwards}
-    @keyframes draw{to{stroke-dashoffset:0}}
-    .blob{animation:blob 12s ease-in-out infinite alternate}
-    @keyframes blob{to{transform:translate(-30px,-16px) scale(1.06)}}
-    .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 1.6s ease-out infinite}
-    @keyframes pulse{from{transform:scale(1);opacity:.8}to{transform:scale(3);opacity:0}}
-    .arrow{animation:nudge 1.4s ${EASE_POP} infinite}
-    @keyframes nudge{50%{transform:translateX(3px)}}
-    ${TWINKLE}
+    .lurk{animation:lurk 9s ease-in-out infinite alternate}
+    @keyframes lurk{from{transform:translate(0,0)}to{transform:translate(-18px,8px)}}
+    ${BASE_CSS} ${EMBER_CSS(H)}
   </style>
 
-  <rect x="6" y="12" width="${W - 12}" height="${H - 12}" rx="28" fill="${C.ink}"/>
   <g clip-path="url(#card)">
-    <rect width="${W}" height="${H}" fill="${C.cream}"/>
-    <path class="blob" fill="${PILLS[i % PILLS.length]}" opacity=".55" d="M620 360c20-120 110-190 220-170s110-60 110-60v260z"/>
-    <path class="blob" fill="${C.lilacLt}" opacity=".6" d="M-40 300c90-40 160 20 250-10s120-60 190-30v80H-40z" style="animation-duration:15s"/>
-    ${sparkle(600, 44, 0.7, C.gold, 0)}${sparkle(770, 250, 0.55, C.amethyst, 1.1)}${sparkle(170, 250, 0.5, C.crimson, 2)}
+    <rect width="${W}" height="${H}" fill="${C.ink}"/>
+    <g class="lurk" opacity=".22">${snake("viper", 560, 20, 340, "url(#bloodFade)")}</g>
+    <g class="lurk" opacity=".55">${viperEyes(560, 20, 340, 0.8)}</g>
+    ${smokeLayers(W, H, 0.3)}
+    ${embers(10, W, H, 31 + i)}
   </g>
-  <rect x="6" y="6" width="${W - 12}" height="${H - 12}" rx="28" fill="none" stroke="${C.ink}" stroke-width="2.5"/>
 
-  <g transform="translate(40,58) rotate(-4)"><text class="hand up">Launch #${String(i + 1).padStart(2, "0")} · ${esc(launched)}</text></g>
+  <g transform="translate(40,58) rotate(-3)"><text class="goth up">Strike #${String(i + 1).padStart(2, "0")} · ${esc(launched)}</text></g>
 
-  <g transform="translate(96,142)"><g class="tilt"><g transform="translate(-56,-56)">
-    <rect x="5" y="7" width="112" height="112" rx="26" fill="${C.ink}"/>
-    <g clip-path="url(#crestClip)"><rect width="112" height="112" fill="url(#crest)"/><rect x="20" y="-30" width="36" height="180" fill="#fff" opacity=".22" class="shine"/></g>
-    <rect width="112" height="112" rx="26" fill="none" stroke="${C.ink}" stroke-width="2.5"/>
+  <g transform="translate(96,148)"><g class="tilt"><g transform="translate(-56,-56)">
+    <rect x="5" y="7" width="112" height="112" rx="14" fill="${C.void}"/>
+    <g clip-path="url(#crestClip)"><rect width="112" height="112" fill="url(#crest)"/>${snake("stipple", 30, -6, 70, "#000", 'opacity=".35"')}<rect x="20" y="-30" width="36" height="180" fill="#fff" opacity=".16" class="shine"/></g>
+    <rect width="112" height="112" rx="14" fill="none" stroke="${C.ember}" stroke-opacity=".6" stroke-width="1.5"/>
     <text x="56" y="72" class="mono" text-anchor="middle">${esc(monogram)}</text>
   </g></g></g>
 
-  <g transform="translate(180,108)">
+  <g transform="translate(180,112)">
     <text y="0" class="name up" style="animation-delay:.1s">${esc(r.name)}</text>
-    <path d="M2 14c70-10 150-12 230-3s90 4 130-6" fill="none" stroke="${C.gold}" stroke-width="5" stroke-linecap="round" class="scrib"/>
+    <path d="M2 14c70-10 150-12 230-3s90 4 130-6" fill="none" stroke="${C.blood}" stroke-width="4" stroke-linecap="round" class="scrib"/>
     ${tagline.map((l, k) => `<text y="${46 + k * 23}" class="tl up" style="animation-delay:${(0.25 + k * 0.08).toFixed(2)}s">${esc(l)}</text>`).join("")}
     <g transform="translate(0,${tagline.length > 1 ? 86 : 64})">${tagEls}</g>
   </g>
 
-  <g transform="translate(${W - 104},118)"><g class="pop" style="animation-delay:.5s">
-    <g class="spin"><path d="${scallop}" fill="url(#crest)" stroke="${C.ink}" stroke-width="2"/></g>
-    <circle r="36" fill="none" stroke="${C.goldLt}" stroke-width="1.5" stroke-dasharray="3 4"/>
-    <g class="bounce"><path d="M0 -26 l10 11 h-20z" fill="${C.goldLt}"/></g>
-    <text y="10" class="seal" text-anchor="middle">${fmt(r.stargazerCount)}</text>
-    <text y="26" class="sealL" text-anchor="middle">UPVOTE</text>
+  <g transform="translate(${W - 104},128)"><g class="pop" style="animation-delay:.5s">
+    <g class="spin"><path d="${fangs}" fill="${C.bone}" fill-opacity=".85"/><circle r="50" fill="none" stroke="${C.blood}" stroke-width="2"/></g>
+    <circle r="36" fill="${C.void}" stroke="${C.blood}" stroke-width="1.5" stroke-dasharray="3 4"/>
+    <g class="bounce"><path d="M0 -26 l9 10 h-18z" fill="${C.ember}"/></g>
+    <text y="9" class="seal" text-anchor="middle">${fmt(r.stargazerCount)}</text>
+    <text y="24" class="sealL" text-anchor="middle">STARS</text>
   </g></g>
 
-  <g transform="translate(${W - 200},40)"><g class="sticker">
-    <rect x="-8" y="-17" width="104" height="32" rx="10" fill="${C.gold}" stroke="${C.ink}" stroke-width="2"/>
-    <circle cx="8" cy="-1" r="5" fill="${C.crimson}" class="pulse"/><circle cx="8" cy="-1" r="5" fill="${C.crimson}"/>
-    <text x="20" y="4" class="live">NOW LIVE</text>
+  <g transform="translate(${W - 214},44)"><g class="sticker">
+    <rect x="-8" y="-17" width="118" height="32" rx="4" fill="${C.blood}" stroke="${C.ember}"/>
+    <circle cx="8" cy="-1" r="5" fill="${C.bone}" class="pulse"/><circle cx="8" cy="-1" r="5" fill="${C.bone}"/>
+    <text x="20" y="3.5" class="live">NOW LIVE</text>
   </g></g>
 
-  <path d="M40 ${H - 74} H${W - 40}" stroke="${C.ink}" stroke-opacity=".12" stroke-dasharray="4 6"/>
+  <path d="M40 ${H - 74} H${W - 40}" stroke="${C.blood}" stroke-opacity=".3" stroke-dasharray="4 6"/>
   <g transform="translate(40,${H - 58})">${statEls}</g>
   <g transform="translate(${W - 300},${H - 128})">${bar}${legend}</g>
+  ${frameEdge(W, H)}
+  ${border(W, H)}
 </svg>`;
 }
 launches.forEach((r, i) => write(`launch-${r.name}.svg`, launchCard(r, i)));
 
 /* --------------------------------------------------------------- toolbox */
 {
-  const W = 900, LABEL = 170, X0 = 196, XMAX = W - 36, ROW = 46;
+  const W = 900, X0 = 196, XMAX = W - 36, ROW = 46;
   let y = 56, k = 0, body = "";
   for (const [group, names] of icons.groups) {
     let x = X0;
@@ -552,11 +853,11 @@ launches.forEach((r, i) => write(`launch-${r.name}.svg`, launchCard(r, i)));
       const delay = (0.15 + k * 0.035).toFixed(3);
       const wave = ((x / W) * 2.4 + (y / 400)).toFixed(2);
       chips += `<g transform="translate(${x},${y})"><g class="chip" style="animation-delay:${delay}s">
-        <rect width="${w}" height="36" rx="18" fill="${C.ink2}" stroke="${C.gold}" stroke-opacity=".28"/>
-        <rect width="${w}" height="36" rx="18" fill="none" stroke="${C.goldLt}" stroke-width="1.6" class="glint" style="animation-delay:${wave}s"/>
-        <circle cx="18" cy="18" r="14" fill="${C.royal}"/>
-        ${path ? `<g transform="translate(9.6,9.6) scale(.7)"><path d="${path}" fill="${C.gold}"/></g>` : `<text x="18" y="22.5" class="ab" text-anchor="middle">${esc(name[0])}</text>`}
-        <text x="40" y="23" class="lb">${esc(name)}</text>
+        <rect width="${w}" height="36" rx="6" fill="${C.ink2}" stroke="${C.blood}" stroke-opacity=".35"/>
+        <rect width="${w}" height="36" rx="6" fill="none" stroke="${C.ember}" stroke-width="1.6" class="glint" style="animation-delay:${wave}s"/>
+        <rect x="4" y="4" width="28" height="28" rx="4" fill="${C.wine}"/>
+        ${path ? `<g transform="translate(9.6,9.6) scale(.7)"><path d="${path}" fill="${C.bloodLt}"/></g>` : `<text x="18" y="22.5" class="ab" text-anchor="middle">${esc(name[0])}</text>`}
+        <text x="42" y="23" class="lb">${esc(name)}</text>
       </g></g>`;
       x += w + 9;
       k++;
@@ -566,95 +867,80 @@ launches.forEach((r, i) => write(`launch-${r.name}.svg`, launchCard(r, i)));
   }
   const H = y + 14;
   write("toolbox.svg", `${svgOpen(W, H, "Toolbox: " + icons.groups.flatMap((g) => g[1]).join(", "))}
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${C.ink}"/><stop offset="1" stop-color="#26154a"/></linearGradient>
-    <clipPath id="frame"><rect width="${W}" height="${H}" rx="28"/></clipPath>
-  </defs>
+  <defs>${COMMON_DEFS}${SMOKE_DEFS}${snakeMasks("stipple")}<clipPath id="frame"><rect width="${W}" height="${H}" rx="22"/></clipPath></defs>
   <style>
-    ${fonts("hand", "bodyBold")}
-    .lb{font:700 13.5px ${F.body};fill:${C.cream}}
-    .ab{font:700 14px ${F.body};fill:${C.gold}}
-    .grp{font:700 27px ${F.hand};fill:${C.gold}}
+    ${fonts("goth", "bodyBold")}
+    .lb{font:700 13.5px ${F.body};fill:${C.bone}}
+    .ab{font:700 14px ${F.body};fill:${C.bloodLt}}
+    .grp{font:400 26px ${F.goth};fill:${C.bloodLt}}
     .chip{animation:chip .7s ${EASE_POP} both}
     @keyframes chip{from{transform:translateY(22px) scale(.6);opacity:0}}
     .glint{opacity:0;animation:glint 6s ease-in-out infinite}
     @keyframes glint{0%,100%{opacity:0}8%{opacity:1}20%{opacity:0}}
-    .up{opacity:0;animation:up .8s ${EASE_OUT} forwards}
-    @keyframes up{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
-    .blob{animation:blob 16s ease-in-out infinite alternate}
-    @keyframes blob{to{transform:translate(-40px,20px) scale(1.05)}}
-    ${TWINKLE}
+    .coil{animation:coil 8s ease-in-out infinite alternate}
+    @keyframes coil{to{transform:translate(-10px,6px)}}
+    ${BASE_CSS}
   </style>
   <g clip-path="url(#frame)">
-    <rect width="${W}" height="${H}" fill="url(#bg)"/>
-    <path class="blob" fill="${C.amethyst}" opacity=".22" d="M560 -40c60 120 200 150 300 110s120 0 120 0V-40z"/>
-    <path class="blob" fill="${C.sapphire}" opacity=".16" d="M-40 ${H - 60}c140-60 220 40 360 0s180-40 260 20v80H-40z" style="animation-duration:20s"/>
-    ${sparkle(W - 50, 30, 0.6, C.goldLt, 0.4)}${sparkle(24, H - 26, 0.5, C.lilac, 1.4)}
+    <rect width="${W}" height="${H}" fill="${C.ink}"/>
+    <g class="coil" opacity=".12">${snake("stipple", 20, H - 330, 170, C.bone)}</g>
+    ${smokeLayers(W, H, 0.25)}
   </g>
-  <rect x="1" y="1" width="${W - 2}" height="${H - 2}" rx="27" fill="none" stroke="${C.gold}" stroke-opacity=".35" stroke-width="2"/>
   ${body}
+  ${frameEdge(W, H)}
+  ${border(W, H)}
 </svg>`);
 }
 
 /* --------------------------------------------------------------- divider */
-write("divider.svg", `${svgOpen(900, 64, "")}
-  <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="${C.gold}" stop-opacity="0"/><stop offset=".5" stop-color="${C.gold}"/><stop offset="1" stop-color="${C.gold}" stop-opacity="0"/></linearGradient></defs>
+{
+  const W = 900, H = 70, LEN = 300;
+  write("divider.svg", `${svgOpen(W, H, "")}
+  <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="${C.blood}" stop-opacity="0"/><stop offset=".5" stop-color="${C.blood}"/><stop offset="1" stop-color="${C.blood}" stop-opacity="0"/></linearGradient></defs>
   <style>
-    .l{stroke-dasharray:420;stroke-dashoffset:420;animation:draw 1.6s ${EASE_OUT} forwards}
-    @keyframes draw{to{stroke-dashoffset:0}}
-    .gem{animation:gem 6s ease-in-out infinite}
-    @keyframes gem{50%{transform:rotate(180deg)}}
-    ${TWINKLE} ${FLAP}
+    .crawl{animation:crawl 16s linear infinite}
+    @keyframes crawl{from{transform:translateX(-${LEN + 20}px)}to{transform:translateX(${W + 20}px)}}
   </style>
-  <path d="M430 32 C 330 32, 250 24, 30 32" fill="none" stroke="url(#g)" stroke-width="2" class="l"/>
-  <path d="M470 32 C 570 32, 650 40, 870 32" fill="none" stroke="url(#g)" stroke-width="2" class="l"/>
-  <path d="M400 32 c10 -10 20 -10 26 0 M500 32 c-10 10 -20 10 -26 0" fill="none" stroke="${C.gold}" stroke-width="2" stroke-linecap="round"/>
-  <g transform="translate(450,32)"><g class="gem"><path d="M0 -13 L13 0 L0 13 L-13 0Z" fill="${C.amethyst}" stroke="${C.gold}" stroke-width="2"/><circle r="3" fill="${C.goldLt}"/></g></g>
-  ${sparkle(320, 22, 0.4, C.gold, 0.5)}${sparkle(590, 44, 0.4, C.lilacDk, 1.5)}
-  ${flight("M-30 40 C 200 0, 350 60, 450 20 S 750 60, 930 20", 14, 0, `<g transform="scale(.6)">${butterfly(C.gold, "#d9a520", 0.26)}</g>`)}
+  <path d="M30 35H870" stroke="url(#g)" stroke-width="1"/>
+  <g transform="translate(0,35)"><g class="crawl" style="animation-delay:-7s">${sketchSnake({ len: LEN, amp: 15, waves: 1.5, width: 8, seed: 4, dur: 1.8, strokes: 7 })}</g></g>
 </svg>`);
+}
 
 /* ---------------------------------------------------------------- footer */
 {
-  const W = 900, H = 200;
-  const wave = (amp, off, y) => {
-    let d = `M 0 ${H}`;
-    for (let x = 0; x <= W * 2; x += 15) d += ` L ${x} ${(y + Math.sin((x / W) * Math.PI * 4 + off) * amp).toFixed(1)}`;
-    return d + ` L ${W * 2} ${H} Z`;
-  };
+  const W = 900, H = 260, VW = 150, VX = (W - VW) / 2, VY = 24;
   write("footer.svg", `${svgOpen(W, H, "thanks for stopping by")}
-  <defs><clipPath id="f"><rect width="${W}" height="${H}" rx="28"/></clipPath>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.ink}"/><stop offset="1" stop-color="#241446"/></linearGradient></defs>
+  <defs>${COMMON_DEFS}${SMOKE_DEFS}${snakeMasks("viper")}<clipPath id="f"><rect width="${W}" height="${H}" rx="22"/></clipPath>
+    <radialGradient id="pool" cx=".5" cy=".3" r=".5"><stop offset="0" stop-color="${C.blood}" stop-opacity=".45"/><stop offset="1" stop-color="${C.blood}" stop-opacity="0"/></radialGradient>
+  </defs>
   <style>
-    ${fonts("hand", "display")}
-    .w1{animation:drift 11s linear infinite}.w2{animation:drift 7s linear infinite reverse}.w3{animation:drift 15s linear infinite}
-    @keyframes drift{from{transform:translateX(0)}to{transform:translateX(-${W / 2}px)}}
-    .t{font:700 36px ${F.hand};fill:${C.gold};text-anchor:middle}
-    .s{font:800 13px ${F.display};letter-spacing:4px;fill:${C.lilac};text-anchor:middle}
-    .up{opacity:0;animation:up 1s ${EASE_OUT} forwards}
-    @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-    .crown{animation:crown 3.4s ease-in-out infinite}
-    @keyframes crown{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(6deg) translateY(-4px)}}
-    ${TWINKLE} ${FLAP}
+    ${fonts("goth", "display")}
+    .t{font:400 34px ${F.goth};fill:${C.bloodLt};text-anchor:middle}
+    .s{font:900 13px ${F.display};letter-spacing:5px;fill:${C.boneDk};text-anchor:middle}
+    .hover{animation:hover 4s ease-in-out infinite}
+    @keyframes hover{50%{transform:translateY(-5px)}}
+    .poolP{animation:poolP 4s ease-in-out infinite}@keyframes poolP{50%{opacity:.5}}
+    ${BASE_CSS} ${EMBER_CSS(H)}
   </style>
   <g clip-path="url(#f)">
-    <rect width="${W}" height="${H}" fill="url(#bg)"/>
-    <path d="${wave(12, 0, 132)}" fill="${C.amethyst}" opacity=".35" class="w1"/>
-    <path d="${wave(10, 2, 148)}" fill="${C.royal}" opacity=".9" class="w2"/>
-    <path d="${wave(8, 4, 166)}" fill="${C.gold}" opacity=".25" class="w3"/>
-    ${sparkle(120, 50, 0.6, C.goldLt, 0)}${sparkle(780, 70, 0.7, C.gold, 1)}${sparkle(660, 30, 0.4, C.lilac, 2)}
-    ${flight("M-40 90 C 150 20, 300 120, 450 70 S 750 20, 940 90", 16, 0, `<g transform="scale(.8)">${butterfly("#4f8dff", C.sapphire)}</g>`)}
-    ${flight("M940 60 C 760 120, 600 30, 450 90 S 150 120, -40 50", 19, -6, `<g transform="scale(.65)">${butterfly(C.rose, C.crimson, 0.27)}</g>`)}
+    <rect width="${W}" height="${H}" fill="${C.void}"/>
+    <ellipse cx="450" cy="90" rx="320" ry="150" fill="url(#pool)" class="poolP"/>
+    ${smokeLayers(W, H, 0.55)}
+    ${embers(22, W, H, 99)}
+    <g transform="translate(0,${H - 34})"><g class="crawlF">${sketchSnake({ len: 260, amp: 8, waves: 2, width: 5, seed: 8, dur: 1.4, strokes: 5 })}</g></g>
   </g>
-  <g transform="translate(450,34)"><g class="crown">${crown(0.5)}</g></g>
-  <text x="450" y="84" class="t up">thanks for stopping by</text>
-  <text x="450" y="108" class="s up" style="animation-delay:.3s">DEVAPRIYAN G S  ✦  DEV-2141</text>
-  <rect x="1" y="1" width="${W - 2}" height="${H - 2}" rx="27" fill="none" stroke="${C.gold}" stroke-opacity=".35" stroke-width="2"/>
+  <g class="hover">${snake("viper", VX, VY, VW, "url(#bloodFade)")}${viperEyes(VX, VY, VW)}</g>
+  <text x="450" y="194" class="t up">thanks for stopping by</text>
+  <text x="450" y="218" class="s up" style="animation-delay:.3s">DEVAPRIYAN G S  ✦  DEV-2141</text>
+  <style>.crawlF{animation:crawlF 20s linear infinite}@keyframes crawlF{from{transform:translateX(${W + 20}px) scaleX(-1)}to{transform:translateX(-20px) scaleX(-1)}}</style>
+  ${frameEdge(W, H)}
+  ${border(W, H)}
 </svg>`);
 }
 
 /* ------------------------------------------------ README launch section */
 {
+  for (const old of ["neofetch-dark.svg", "neofetch-light.svg"]) rmSync(new URL(old, OUT), { force: true });
   const readmeUrl = new URL("README.md", root);
   const readme = readFileSync(readmeUrl, "utf8");
   const block = launches.map((r) => `<a href="${r.url}"><img src="./generated/launch-${r.name}.svg" width="100%" alt="${r.name} — launch card"/></a>`).join("\n");
@@ -668,4 +954,4 @@ write("divider.svg", `${svgOpen(900, 64, "")}
   );
 }
 
-console.log(`built: header, neofetch, ${launches.length} launch cards, toolbox, titles, divider, footer · LOC +${loc.add}/-${loc.del}`);
+console.log(`built: header, neofetch, analytics, ${launches.length} launch cards, toolbox, titles, divider, footer · LOC +${loc.add}/-${loc.del} · streak ${streaks.current}/${streaks.longest}`);

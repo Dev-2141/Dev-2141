@@ -35,6 +35,14 @@
           "Signals",
           "Simulation"
         ]
+      },
+      "THE-DAY": {
+        "tagline": "A full-screen living poster that doubles as an app home screen, for Windows and Android from one codebase.",
+        "tags": [
+          "Desktop App",
+          "Android",
+          "Animation"
+        ]
       }
     }
   }
