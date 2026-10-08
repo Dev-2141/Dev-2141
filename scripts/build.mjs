@@ -893,16 +893,27 @@ launches.forEach((r, i) => write(`launch-${r.name}.svg`, launchCard(r, i)));
 }
 
 /* --------------------------------------------------------------- divider */
+// A chain of viper heads (the footer's snake), linked by small rings, with a blood pulse running down it.
 {
-  const W = 900, H = 70, LEN = 300;
+  const W = 900, H = 70, N = 17, GAP = 50, HW = 26, HH = (HW * IMG.viper[2]) / IMG.viper[1], CY = H / 2, DUR = 3.4;
+  const x0 = (W - (N - 1) * GAP) / 2;
+  const fade = (i) => (0.25 + 0.75 * Math.sin((Math.PI * (i + 0.5)) / N)).toFixed(2);
+  let chain = "";
+  for (let i = 0; i < N; i++) {
+    const cx = x0 + i * GAP, delay = (-DUR + (i / N) * DUR).toFixed(2);
+    if (i < N - 1) {
+      const lx = cx + GAP / 2;
+      chain += `<g opacity="${fade(i + 0.5)}"><line x1="${n1(cx + HW / 2 + 2)}" y1="${CY}" x2="${n1(lx - 6)}" y2="${CY}" stroke="${C.bloodDk}" stroke-width="1.2"/><line x1="${n1(lx + 6)}" y1="${CY}" x2="${n1(cx + GAP - HW / 2 - 2)}" y2="${CY}" stroke="${C.bloodDk}" stroke-width="1.2"/><ellipse cx="${n1(lx)}" cy="${CY}" rx="6" ry="3" fill="none" stroke="${C.blood}" stroke-width="1.3"/></g>`;
+    }
+    chain += `<g opacity="${fade(i)}">${snake("viper", cx - HW / 2, CY - HH / 2, HW, C.bloodDk, `class="pulse" style="animation-delay:${delay}s"`)}</g>`;
+  }
   write("divider.svg", `${svgOpen(W, H, "")}
-  <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="${C.blood}" stop-opacity="0"/><stop offset=".5" stop-color="${C.blood}"/><stop offset="1" stop-color="${C.blood}" stop-opacity="0"/></linearGradient></defs>
+  <defs>${snakeMasks("viper")}</defs>
   <style>
-    .crawl{animation:crawl 16s linear infinite}
-    @keyframes crawl{from{transform:translateX(-${LEN + 20}px)}to{transform:translateX(${W + 20}px)}}
+    .pulse{animation:pulse ${DUR}s ease-in-out infinite}
+    @keyframes pulse{0%,60%,100%{fill:${C.bloodDk};transform:translateY(0)}30%{fill:${C.ember};transform:translateY(-3px)}}
   </style>
-  <path d="M30 35H870" stroke="url(#g)" stroke-width="1"/>
-  <g transform="translate(0,35)"><g class="crawl" style="animation-delay:-7s">${sketchSnake({ len: LEN, amp: 15, waves: 1.5, width: 8, seed: 4, dur: 1.8, strokes: 7 })}</g></g>
+  ${chain}
 </svg>`);
 }
 
