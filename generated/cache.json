@@ -18,5 +18,9 @@
   "portio": {
     "add": 2401,
     "del": 0
+  },
+  "scroll-hero-frame": {
+    "add": 4248,
+    "del": 0
   }
 }
