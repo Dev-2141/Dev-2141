@@ -1,22 +1,27 @@
 {
   "user": "Dev-2141",
   "timezone": "Asia/Kolkata",
-  "header": {
+  "hero": {
+    "name": "Devapriyan",
+    "kicker": "~/ HELLO, WORLD — I AM",
+    "aka": "AKA HEBI ✦ VIBE CODER",
+    "sticker": "OPEN TO COLLAB ✦ VIBE CODING ✦ ",
     "phrases": [
       "I build AI agents & MCP servers.",
       "I ship web apps in TypeScript.",
       "I write Python that talks to hardware."
     ]
   },
-  "neofetch": {
-    "OS": "Windows 11, Android, Arduino",
-    "Host": "Ernakulam, Kerala, India",
+  "orbit": "✦ HEBI ✦ DEV-2141 ✦ VIBE CODER ✦ STUDENT DEV ✦ AI · WEB · HARDWARE ",
+  "about": {
     "Kernel": "Student Developer",
-    "IDE": "VS Code, Android Studio, Arduino IDE",
-    "Hobbies.Software": "AI agents, MCP servers, web apps",
-    "Hobbies.Hardware": "Arduino, spectrum sensing"
+    "OS": "Windows, macOS, Linux, Android, iOS",
+    "IDE": "Visual Studio Code, Visual Studio, IntelliJ IDEA, PyCharm, Eclipse, Xcode",
+    "Software": "AI agents, MCP servers, web apps",
+    "Hardware": "Arduino, spectrum sensing"
   },
-  "launches": {
+  "projects": {
+    "max": 6,
     "hide": [
       "Dev-2141"
     ],
@@ -32,18 +37,113 @@
         "tagline": "SPECTRA-SCAN AI — an adaptive smart-scan scheduler for simulated spectrum surveillance.",
         "tags": [
           "AI",
-          "Signals",
-          "Simulation"
+          "Signals"
         ]
       },
       "THE-DAY": {
         "tagline": "A full-screen living poster that doubles as an app home screen, for Windows and Android from one codebase.",
         "tags": [
-          "Desktop App",
-          "Android",
-          "Animation"
+          "Desktop",
+          "Android"
+        ]
+      },
+      "scroll-hero-frame": {
+        "tagline": "A scroll-scrubbed, frame-by-frame cinematic hero section — live on GitHub Pages.",
+        "tags": [
+          "Animation",
+          "Web"
         ]
       }
+    },
+    "comingSoon": "Next drop is brewing in the lab — stay tuned."
+  },
+  "outro": [
+    [
+      "またね！",
+      "JAPANESE · mata ne!"
+    ],
+    [
+      "SEE YA!",
+      "ENGLISH"
+    ],
+    [
+      "फिर मिलेंगे!",
+      "HINDI · phir milenge"
+    ],
+    [
+      "വീണ്ടും കാണാം!",
+      "MALAYALAM · veendum kaanaam"
+    ],
+    [
+      "மீண்டும் சந்திப்போம்!",
+      "TAMIL · meendum sandhippom"
+    ],
+    [
+      "ಮತ್ತೆ ಸಿಗೋಣ!",
+      "KANNADA · matte sigona"
+    ],
+    [
+      "మళ్ళీ కలుద్దాం!",
+      "TELUGU · malli kaluddam"
+    ],
+    [
+      "আবার দেখা হবে!",
+      "BENGALI · abar dekha hobe"
+    ],
+    [
+      "पुन्हा भेटू!",
+      "MARATHI · punha bhetu"
+    ],
+    [
+      "再见！",
+      "MANDARIN · zàijiàn"
+    ],
+    [
+      "또 봐요!",
+      "KOREAN · tto bwayo"
+    ],
+    [
+      "¡HASTA LUEGO!",
+      "SPANISH"
+    ],
+    [
+      "À BIENTÔT !",
+      "FRENCH"
+    ],
+    [
+      "BIS BALD!",
+      "GERMAN"
+    ],
+    [
+      "إلى اللقاء!",
+      "ARABIC · ila al-liqa"
+    ],
+    [
+      "ATÉ LOGO!",
+      "PORTUGUESE"
+    ]
+  ],
+  "connect": [
+    {
+      "file": "btn-github",
+      "title": "GITHUB",
+      "sub": "Dev-2141",
+      "icon": "github",
+      "href": "https://github.com/Dev-2141"
+    },
+    {
+      "file": "btn-repos",
+      "title": "REPOS",
+      "sub": "DIVE IN",
+      "icon": "repos",
+      "href": "https://github.com/Dev-2141?tab=repositories"
+    },
+    {
+      "file": "btn-follow",
+      "title": "FOLLOW",
+      "sub": "SAY HI",
+      "icon": "follow",
+      "href": "https://github.com/Dev-2141?tab=followers"
     }
-  }
+  ]
 }

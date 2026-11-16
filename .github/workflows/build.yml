@@ -2,7 +2,7 @@ name: build profile
 
 on:
   schedule:
-    - cron: "30 18 * * *" # daily, midnight IST
+    - cron: "17 * * * *" # hourly, so new pushes, repos and descriptions show up on their own
   workflow_dispatch:
   push:
     branches: [main]
